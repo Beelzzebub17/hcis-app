@@ -2,89 +2,167 @@
 <html lang="id">
 <head>
   <meta charset="utf-8" />
-  <title>HCIS Smarthic — Final Bundle</title>
+  <title>SmartHCIS — Final</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <!-- Bootstrap CSS + Icons -->
+
+  <!-- Bootstrap CSS + Icons (CDN) -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
+    /* ===== Theme variables ===== */
     :root{
-      --brand:#0d6efd;
-      --accent:#0648b0;
-      --surface:#f6f9ff;
-      --card-radius:12px;
-      --success:#16a34a;
-      --danger:#dc2626;
+      --brand: #3b82f6;        /* bright blue */
+      --brand-2: #0b4df5;      /* deeper blue */
+      --sidebar-deep: #07173b; /* very dark blue for sidebar bg */
+      --surface: #f4f7ff;
+      --muted: #94a3b8;
+      --card-radius: 12px;
+      --success: #16a34a;
+      --danger: #ef4444;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--surface);color:#0b1724}
-    /* LOGIN */
+
+    * { box-sizing: border-box; }
+    html,body { height:100%; margin:0; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--surface); color:#0b1724; -webkit-font-smoothing:antialiased; }
+
+    /* ===== Login page ===== */
     .login-page{
       min-height:100vh;
-      background-image:linear-gradient(rgba(3,7,18,0.35),rgba(3,7,18,0.35)), url('https://images.unsplash.com/photo-1521790797524-b2497295b8a0?auto=format&fit=crop&w=1920&q=80');
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background-image:
+        linear-gradient(0deg, rgba(3,7,30,0.45), rgba(3,7,30,0.22)),
+        url('https://images.unsplash.com/photo-1521790797524-b2497295b8a0?auto=format&fit=crop&w=1920&q=80');
       background-size:cover;
       background-position:center;
-      display:flex;align-items:center;justify-content:center;
+      padding:24px;
     }
     .login-card{
-      width:100%;max-width:420px;background:rgba(255,255,255,0.95);border-radius:16px;padding:32px;box-shadow:0 12px 30px rgba(4,9,30,0.28);backdrop-filter: blur(4px);
+      width:100%;
+      max-width:480px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.96), rgba(245,250,255,0.95));
+      border-radius:16px;
+      padding:28px;
+      box-shadow: 0 20px 50px rgba(4,9,30,0.36);
+      border:1px solid rgba(255,255,255,0.6);
+      text-align:center;
     }
-    .login-logo{width:84px;margin-bottom:6px}
-    /* APP LAYOUT */
-    .app-wrap{display:flex;min-height:100vh}
+    .login-logo { display:inline-block; width:92px; height:92px; margin-bottom:8px; }
+
+    /* ===== App layout ===== */
+    .app-wrap { display:flex; min-height:100vh; }
+    /* Sidebar */
     .sidebar{
-      width:260px;background:linear-gradient(180deg,var(--brand),var(--accent));color:#e7f0ff;padding:18px 12px;position:fixed;left:0;top:0;bottom:0;overflow:auto;
-      box-shadow:2px 0 12px rgba(3,7,18,0.12);
+      width:300px;
+      background: linear-gradient(180deg, var(--sidebar-deep), #0b3366);
+      color: #eaf2ff;
+      padding:18px 14px;
+      position:fixed;
+      left:0; top:0; bottom:0;
+      overflow:auto;
+      box-shadow: 8px 0 30px rgba(3,7,30,0.28);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
     }
-    .sidebar .brand{display:flex;align-items:center;gap:10px;padding:8px 12px 18px;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:12px}
-    .sidebar .brand img{width:38px}
-    .sidebar h1{font-size:16px;margin:0;font-weight:700;color:#fff}
-    .nav-list{list-style:none;padding:0;margin:0}
-    .nav-item{margin:6px 8px}
-    .nav-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:rgba(255,255,255,0.92);text-decoration:none}
-    .nav-link:hover{background:rgba(255,255,255,0.06)}
-    .nav-link.active{background:rgba(0,0,0,0.12);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.03)}
-    .sidebar-footer{margin-top:14px;padding:8px 12px;font-size:12px;color:rgba(255,255,255,0.8);border-top:1px solid rgba(255,255,255,0.03)}
-    main.content{margin-left:300px;padding:22px;flex:1;min-height:100vh}
-    .card-radius{border-radius:var(--card-radius)}
-    /* Page transitions (fade + slight slide) */
-    .page{display:none;opacity:0;transform:translateY(10px);transition:opacity .26s ease,transform .26s ease}
-    .page.active{display:block;opacity:1;transform:translateY(0)}
-    /* Toast */
-    .toast-wrap{position:fixed;right:18px;top:18px;z-index:2200;display:flex;flex-direction:column;gap:10px}
-    .toast-card{min-width:220px;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 10px 24px rgba(4,9,30,0.12);transform:translateY(-8px);opacity:0;transition:transform .18s,opacity .18s}
-    .toast-card.show{transform:none;opacity:1}
-    .toast-success{background:linear-gradient(90deg,#16a34a,#34d399)}
-    .toast-error{background:linear-gradient(90deg,#ef4444,#f87171)}
-    .toast-info{background:linear-gradient(90deg,#0d6efd,#2563eb)}
-    /* Modal smooth */
-    .modal.fade .modal-dialog{transform:translateY(10px);transition:transform .26s cubic-bezier(.2,.8,.2,1),opacity .15s}
-    .modal.fade.show .modal-dialog{transform:none}
-    /* Responsive */
-    @media (max-width:900px){
-      .sidebar{width:68px;padding:12px}
-      .sidebar h1{display:none}
-      .nav-link span{display:none}
-      main.content{margin-left:84px;padding:16px}
+    .sidebar .brand{ display:flex; gap:12px; align-items:center; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.04); margin-bottom:12px; }
+    .sidebar .brand svg { width:46px; height:46px; }
+    .sidebar h1{ margin:0; font-size:16px; font-weight:800; color:#fff; letter-spacing:0.2px; }
+    .sidebar .muted { font-size:12px; color:rgba(255,255,255,0.82); margin-top:2px; }
+
+    .nav-list{ list-style:none; padding:0; margin:12px 0 0 0; }
+    .nav-item{ margin:6px 6px; }
+    .nav-link{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px;
+      border-radius:12px;
+      color:rgba(255,255,255,0.92);
+      text-decoration:none;
+      transition: background .12s ease, transform .08s ease;
     }
-    /* small helpers */
-    .muted { color:#6b7280 }
-    .kpi { padding:14px;border-radius:10px;background:linear-gradient(180deg,#fff,#f8fbff);box-shadow:0 8px 18px rgba(6,14,40,0.04);display:flex;justify-content:space-between;align-items:center;gap:12px }
-    .kpi .title { font-size:13px;color:#64748b }
-    .kpi .val { font-size:20px;font-weight:700 }
+    .nav-link i { width:28px; text-align:center; opacity:0.95; }
+    .nav-link span { font-weight:600; font-size:14px; }
+    .nav-link:hover{ background: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); transform: translateY(-1px); color:#fff; }
+    .nav-link.active{
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      box-shadow: 0 6px 18px rgba(11,77,245,0.08);
+      color:#fff;
+    }
+
+    .sidebar-footer{ margin-top:16px; padding-top:10px; font-size:12px; color:rgba(255,255,255,0.82); border-top:1px solid rgba(255,255,255,0.03); }
+
+    /* Main content */
+    main.content{ margin-left:340px; padding:28px; flex:1; min-height:100vh; }
+    .card-radius{ border-radius:var(--card-radius); }
+
+    /* Page transition: fade + slight slide */
+    .page { display:none; opacity:0; transform: translateY(10px); transition: opacity .28s cubic-bezier(.2,.9,.2,1), transform .28s cubic-bezier(.2,.9,.2,1); }
+    .page.active{ display:block; opacity:1; transform: translateY(0); }
+
+    /* Toasts */
+    .toast-wrap{ position:fixed; right:18px; top:18px; z-index:2200; display:flex; flex-direction:column; gap:10px; }
+    .toast-card{ min-width:220px; padding:10px 14px; color:#fff; border-radius:10px; box-shadow:0 10px 24px rgba(4,9,30,0.12); transform: translateY(-8px); opacity:0; transition: transform .18s, opacity .18s; }
+    .toast-card.show{ transform:none; opacity:1; }
+    .toast-success{ background: linear-gradient(90deg, #16a34a, #34d399); }
+    .toast-error{ background: linear-gradient(90deg, #ef4444, #f87171); }
+    .toast-info{ background: linear-gradient(90deg, var(--brand), #2b7bff); }
+
+    /* Modal smoother animation */
+    .modal.fade .modal-dialog{ transform: translateY(10px); transition: transform .26s cubic-bezier(.2,.8,.2,1), opacity .15s; }
+    .modal.fade.show .modal-dialog{ transform: translateY(0); }
+
+    /* small responsive */
+    @media (max-width: 980px){
+      .sidebar{ width:72px; padding:14px; }
+      .sidebar h1, .sidebar .muted { display:none; }
+      .nav-link span { display:none; }
+      main.content{ margin-left:92px; padding:18px; }
+    }
+
+    /* helpers */
+    .muted { color:var(--muted); }
+    .kpi { padding:14px; border-radius:10px; background:linear-gradient(180deg,#fff,#f6fbff); box-shadow:0 8px 18px rgba(6,14,40,0.04); display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .kpi .title{ font-size:13px; color:#64748b; }
+    .kpi .val{ font-size:20px; font-weight:700; color:var(--brand-2); }
+    .btn-brand { background: linear-gradient(90deg, var(--brand), var(--brand-2)); color:#fff; border: none; }
+    .btn-brand-outline { background: transparent; border:1px solid rgba(255,255,255,0.08); color:#fff; }
+    .table-light th { background: #f8fbff; }
+    .ghost-card { background: linear-gradient(180deg,#ffffffcc,#f6faff); border-radius:12px; box-shadow:0 10px 30px rgba(7,20,60,0.06); padding:16px; }
   </style>
 </head>
 <body>
 
-  <!-- LOGIN PAGE -->
+  <!-- ===== LOGIN PAGE ===== -->
   <div id="loginPage" class="login-page" aria-hidden="false">
-    <div class="login-card text-center" role="main" aria-labelledby="loginTitle">
-      <img class="login-logo" src="https://i.ibb.co/t3v0BzG/hcis-logo.png" alt="HCIS Logo">
-      <h2 id="loginTitle" class="fw-bold mb-1">HCIS Smarthic</h2>
-      <p class="muted mb-3">Masuk untuk melihat dashboard & data perusahaan</p>
+    <div class="login-card" role="main" aria-labelledby="loginTitle">
+      <!-- SVG "H" Logo (futuristic) -->
+      <div class="login-logo mx-auto" aria-hidden="true">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SmartHCIS logo">
+          <defs>
+            <linearGradient id="lg2" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#79b8ff"/>
+              <stop offset="1" stop-color="#0b4df5"/>
+            </linearGradient>
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+              <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <g filter="url(#glow)">
+            <rect x="12" y="14" width="18" height="72" rx="6" fill="url(#lg2)"/>
+            <rect x="70" y="14" width="18" height="72" rx="6" fill="url(#lg2)"/>
+            <rect x="36" y="40" width="28" height="20" rx="6" fill="#eaf5ff" transform="skewX(-10)"/>
+          </g>
+        </svg>
+      </div>
+
+      <h2 id="loginTitle" class="fw-bold mb-1" style="color:var(--brand-2)">SmartHCIS</h2>
+      <div class="muted mb-3">Addon Human Capital — masuk untuk melihat dashboard</div>
 
       <div class="form-floating mb-3">
         <input id="loginUser" class="form-control" placeholder="username" aria-label="username">
@@ -95,24 +173,36 @@
         <label for="loginPass">Password</label>
       </div>
 
-      <div class="d-grid gap-2">
-        <button id="btnLogin" class="btn btn-primary btn-lg">Masuk</button>
+      <div class="d-grid gap-2 mb-2">
+        <button id="btnLogin" class="btn btn-brand btn-lg">Masuk ke SmartHCIS</button>
       </div>
 
-      <div id="loginError" class="text-danger small mt-2" style="min-height:20px"></div>
-      <div class="text-muted small mt-3">Demo credentials: <strong>admin / 12345</strong></div>
+      <div id="loginError" class="text-danger small mb-2" style="min-height:18px"></div>
+      <div class="text-muted small">Demo credentials: <strong>admin / 12345</strong></div>
     </div>
   </div>
 
-  <!-- APP -->
+  <!-- ===== APP (hidden until login) ===== -->
   <div id="app" class="app-wrap" style="display:none;" aria-hidden="true">
-    <!-- SIDEBAR -->
+    <!-- Sidebar -->
     <aside class="sidebar" role="navigation" aria-label="Main menu">
-      <div class="brand">
-        <img src="https://i.ibb.co/t3v0BzG/hcis-logo.png" alt="logo">
+      <div class="brand" role="banner">
+        <!-- small SVG variant -->
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="lgS" x1="0" x2="1"><stop offset="0" stop-color="#79b8ff"/><stop offset="1" stop-color="#0b4df5"/></linearGradient>
+            <filter id="gGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <g filter="url(#gGlow)">
+            <rect x="12" y="14" width="18" height="72" rx="5" fill="url(#lgS)"/>
+            <rect x="70" y="14" width="18" height="72" rx="5" fill="url(#lgS)"/>
+            <rect x="36" y="40" width="28" height="20" rx="5" fill="#eaf5ff" transform="skewX(-10)"/>
+          </g>
+        </svg>
+
         <div>
-          <h1>Addon SmartHCIS</h1>
-          <div class="muted small">Human Capital Addon</div>
+          <h1>SmartHCIS</h1>
+          <div class="muted small">Addon Human Capital</div>
         </div>
       </div>
 
@@ -128,10 +218,10 @@
         <li class="nav-item mt-2"><a class="nav-link" id="logoutBtn" href="#" style="color:#fff"><i class="bi bi-box-arrow-right fs-5"></i><span>Logout</span></a></li>
       </ul>
 
-      <div class="sidebar-footer">© 2025 Human Capital Information System</div>
+      <div class="sidebar-footer">© 2025 SmartHCIS</div>
     </aside>
 
-    <!-- MAIN -->
+    <!-- Main content -->
     <main class="content" role="main">
       <!-- DASHBOARD -->
       <section id="page-dashboard" class="page active" aria-labelledby="dashTitle">
@@ -141,35 +231,15 @@
             <div class="muted">Ringkasan performa dan aktivitas sistem</div>
           </div>
           <div class="d-flex gap-2">
-            <button id="exportAllBtn" class="btn btn-outline-light btn-sm" title="Export demo"><i class="bi bi-download"></i> Export Demo</button>
+            <button id="exportAllBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-download"></i> Export Demo</button>
           </div>
         </div>
 
         <div class="row g-3 mb-4">
-          <div class="col-md-3">
-            <div class="kpi">
-              <div><div class="title">Total Karyawan</div><div class="val" id="k_total">0</div></div>
-              <div class="text-muted text-end"><i class="bi bi-people-fill fs-3" style="color:var(--brand)"></i></div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="kpi">
-              <div><div class="title">Pelatihan Aktif</div><div class="val" id="k_training">0</div></div>
-              <div class="text-muted text-end"><i class="bi bi-award fs-3" style="color:#f59e0b"></i></div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="kpi">
-              <div><div class="title">Kehadiran Hari Ini</div><div class="val" id="k_attendance">96%</div></div>
-              <div class="text-muted text-end"><i class="bi bi-clock-history fs-3" style="color:#10b981"></i></div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="kpi">
-              <div><div class="title">Proyek Aktif</div><div class="val" id="k_projects">5</div></div>
-              <div class="text-muted text-end"><i class="bi bi-kanban fs-3" style="color:#0ea5e9"></i></div>
-            </div>
-          </div>
+          <div class="col-md-3"><div class="kpi"><div><div class="title">Total Karyawan</div><div class="val" id="k_total">0</div></div><div class="text-muted text-end"><i class="bi bi-people-fill fs-3" style="color:var(--brand)"></i></div></div></div>
+          <div class="col-md-3"><div class="kpi"><div><div class="title">Pelatihan Aktif</div><div class="val" id="k_training">0</div></div><div class="text-muted text-end"><i class="bi bi-award fs-3" style="color:#f59e0b"></i></div></div></div>
+          <div class="col-md-3"><div class="kpi"><div><div class="title">Kehadiran Hari Ini</div><div class="val" id="k_attendance">96%</div></div><div class="text-muted text-end"><i class="bi bi-clock-history fs-3" style="color:#10b981"></i></div></div></div>
+          <div class="col-md-3"><div class="kpi"><div><div class="title">Proyek Aktif</div><div class="val" id="k_projects">5</div></div><div class="text-muted text-end"><i class="bi bi-kanban fs-3" style="color:#0ea5e9"></i></div></div></div>
         </div>
 
         <div class="card p-3 mb-3 card-radius">
@@ -185,36 +255,36 @@
       </section>
 
       <!-- PERSONAL -->
-      <section id="page-personal" class="page" aria-labelledby="personalTitle" hidden>
+      <section id="page-personal" class="page" hidden>
         <div class="d-flex justify-content-between align-items-center mb-3">
           <div>
-            <h2 id="personalTitle" class="mb-0">Personal Administration</h2>
+            <h2 class="mb-0">Personal Administration</h2>
             <div class="muted">Kelola data karyawan</div>
           </div>
           <div>
-            <button id="exportPersonal" class="btn btn-outline-light btn-sm me-2"><i class="bi bi-download"></i> Export CSV</button>
-            <button id="btnAddPerson" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Tambah Karyawan</button>
+            <button id="exportPersonal" class="btn btn-brand-outline btn-sm me-2"><i class="bi bi-download"></i> Export CSV</button>
+            <button id="btnAddPerson" class="btn btn-brand btn-sm"><i class="bi bi-plus-lg"></i> Tambah Karyawan</button>
           </div>
         </div>
 
         <div class="card p-3 card-radius">
           <table class="table table-hover mb-0">
-            <thead class="table-light"><tr><th>NIK</th><th>Nama</th><th>Divisi</th><th>Jabatan</th><th style="width:140px">Aksi</th></tr></thead>
+            <thead class="table-light"><tr><th>NIK</th><th>Nama</th><th>Divisi</th><th>Jabatan</th><th style="width:160px">Aksi</th></tr></thead>
             <tbody id="personalTBody"></tbody>
           </table>
         </div>
       </section>
 
-      <!-- PAYROLL (PR) -->
-      <section id="page-payroll" class="page" aria-labelledby="prTitle" hidden>
+      <!-- PURCHASE REQUISITION -->
+      <section id="page-payroll" class="page" hidden>
         <div class="d-flex justify-content-between align-items-center mb-3">
           <div>
-            <h2 id="prTitle" class="mb-0">Purchase Requisition (Tambah Harga)</h2>
+            <h2 class="mb-0">Purchase Requisition</h2>
             <div class="muted">Masukkan harga item untuk PR</div>
           </div>
           <div>
-            <button id="exportPR" class="btn btn-outline-light btn-sm me-2"><i class="bi bi-download"></i> Export CSV</button>
-            <button id="btnNewPR" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Tambah Item</button>
+            <button id="exportPR" class="btn btn-brand-outline btn-sm me-2"><i class="bi bi-download"></i> Export CSV</button>
+            <button id="btnNewPR" class="btn btn-brand btn-sm"><i class="bi bi-plus-lg"></i> Tambah Item</button>
           </div>
         </div>
 
@@ -282,7 +352,7 @@
             <div class="col-md-6"><label class="form-label">Nama Sistem</label><input id="s_name" class="form-control"></div>
             <div class="col-md-6"><label class="form-label">Email Admin</label><input id="s_email" type="email" class="form-control"></div>
             <div class="col-md-4"><label class="form-label">Mode</label><select id="s_mode" class="form-select"><option>Production</option><option>Testing</option><option>Development</option></select></div>
-            <div class="col-12 text-end"><button class="btn btn-primary">Simpan Setting</button></div>
+            <div class="col-12 text-end"><button class="btn btn-brand" type="submit">Simpan Setting</button></div>
           </form>
         </div>
       </section>
@@ -291,8 +361,8 @@
       <section id="page-profile" class="page" hidden>
         <h2 class="mb-3">Profile</h2>
         <div class="card p-3 card-radius">
-          <p><strong>Nama:</strong> <span id="profileName">Admin HCIS</span></p>
-          <p><strong>Email:</strong> <span id="profileEmail">admin@hcis.com</span></p>
+          <p><strong>Nama:</strong> <span id="profileName">Admin SmartHCIS</span></p>
+          <p><strong>Email:</strong> <span id="profileEmail">admin@smarthcis.com</span></p>
         </div>
       </section>
     </main>
@@ -301,12 +371,11 @@
   <!-- Toast container -->
   <div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- MODALS -->
-  <!-- Person Add/Edit -->
+  <!-- ===== Modals (Person, View, PR edit) ===== -->
   <div class="modal fade" id="personModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <form id="personForm" class="modal-content">
-        <div class="modal-header"><h5 id="personModalTitle" class="modal-title">Tambah Karyawan</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header"><h5 id="personModalTitle" class="modal-title">Tambah Karyawan</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
         <div class="modal-body">
           <input type="hidden" id="person_index">
           <div class="mb-3"><label class="form-label">NIK</label><input id="person_nik" class="form-control" required></div>
@@ -314,12 +383,11 @@
           <div class="mb-3"><label class="form-label">Divisi</label><input id="person_div" class="form-control"></div>
           <div class="mb-3"><label class="form-label">Jabatan</label><input id="person_pos" class="form-control"></div>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-primary">Simpan</button></div>
+        <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-brand">Simpan</button></div>
       </form>
     </div>
   </div>
 
-  <!-- Person View -->
   <div class="modal fade" id="personViewModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm">
       <div class="modal-content">
@@ -330,12 +398,11 @@
           <p><strong>Divisi:</strong> <span id="view_div"></span></p>
           <p><strong>Jabatan:</strong> <span id="view_pos"></span></p>
         </div>
-        <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button></div>
+        <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button></div>
       </div>
     </div>
   </div>
 
-  <!-- PR Edit Modal -->
   <div class="modal fade" id="prEditModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <form id="prEditForm" class="modal-content">
@@ -347,7 +414,7 @@
           <div class="mb-3"><label class="form-label">Unit Price</label><input id="e_pr_price" type="number" min="0" class="form-control" required></div>
           <div class="mb-3"><label class="form-label">Vendor</label><input id="e_pr_vendor" class="form-control"></div>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-primary">Update</button></div>
+        <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-brand">Update</button></div>
       </form>
     </div>
   </div>
@@ -356,14 +423,14 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-  /* --------------------------
+  /* ===========================
      Helpers: toast, format, escape
-     -------------------------- */
+     =========================== */
   const toastWrap = document.getElementById('toastWrap');
-  function showToast(title, msg, type='info', ms=2600) {
+  function showToast(title, msg, type='info', ms=2600){
     const el = document.createElement('div');
     el.className = 'toast-card ' + (type==='success' ? 'toast-success' : (type==='error' ? 'toast-error' : 'toast-info'));
-    el.innerHTML = `<div style="font-weight:700;margin-bottom:4px">${title}</div><div style="font-size:13px">${msg}</div>`;
+    el.innerHTML = `<div style="font-weight:700;margin-bottom:6px">${title}</div><div style="font-size:13px">${msg}</div>`;
     toastWrap.appendChild(el);
     requestAnimationFrame(()=> el.classList.add('show'));
     setTimeout(()=> { el.classList.remove('show'); setTimeout(()=> el.remove(), 300); }, ms);
@@ -371,10 +438,10 @@
   function formatIDR(n){ return new Intl.NumberFormat('id-ID').format(n); }
   function escapeHtml(s=''){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 
-  /* --------------------------
-     Auth (login)
-     -------------------------- */
-  const LOGIN_KEY = 'hcis_demo_logged';
+  /* ===========================
+     Authentication (demo)
+     =========================== */
+  const LOGIN_KEY = 'smarthcis_demo_logged';
   const demoUser = { user:'admin', pass:'12345' };
   const loginPage = document.getElementById('loginPage');
   const app = document.getElementById('app');
@@ -393,19 +460,19 @@
         app.style.display = 'flex';
         app.setAttribute('aria-hidden','false');
         initAfterLogin();
-      }, 350);
+      }, 300);
     } else {
       err.textContent = 'Username atau password salah.';
       showToast('Gagal','Kredensial salah.','error');
     }
   });
 
-  // Quick Enter key to login
+  // Enter to login convenience
   ['loginUser','loginPass'].forEach(id => {
     document.getElementById(id).addEventListener('keydown', (e) => { if(e.key === 'Enter') document.getElementById('btnLogin').click(); });
   });
 
-  // Auto-login if flag set
+  // Auto-login if flag present
   window.addEventListener('load', () => {
     if(localStorage.getItem(LOGIN_KEY) === '1'){
       loginPage.style.display = 'none';
@@ -415,9 +482,9 @@
     }
   });
 
-  /* --------------------------
-     Navigation: show pages with transitions
-     -------------------------- */
+  /* ===========================
+     Navigation (fade + slide)
+     =========================== */
   document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', (ev) => {
       ev.preventDefault();
@@ -429,12 +496,14 @@
   });
 
   function showPage(id){
+    // hide all
     document.querySelectorAll('main .page').forEach(p => { p.classList.remove('active'); p.hidden = true; });
     const target = document.getElementById('page-' + id);
     if(!target) return;
     target.hidden = false;
+    // allow reflow then show with class -> CSS handles fade/slide
     requestAnimationFrame(()=> target.classList.add('active'));
-    // lazy-update some pages
+    // update charts lazily
     if(id === 'performance') renderPerformanceChart();
   }
 
@@ -443,19 +512,19 @@
     e.preventDefault();
     localStorage.removeItem(LOGIN_KEY);
     showToast('Logout','Anda telah logout','info');
-    setTimeout(()=> location.reload(), 600);
+    setTimeout(()=> location.reload(), 700);
   });
 
-  /* --------------------------
-     Local storage helpers & seed data
-     -------------------------- */
+  /* ===========================
+     Storage keys & seed data
+     =========================== */
   function read(key){ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }
   function write(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
 
-  const KEY_PERSON = 'hcis_personal_demo';
-  const KEY_PR = 'hcis_pr_demo';
-  const KEY_SURVEY = 'hcis_survey_demo';
-  const KEY_SETTING = 'hcis_setting_demo';
+  const KEY_PERSON = 'smarthcis_personal';
+  const KEY_PR = 'smarthcis_pr';
+  const KEY_SURVEY = 'smarthcis_survey';
+  const KEY_SETTING = 'smarthcis_setting';
 
   if(!read(KEY_PERSON)){
     write(KEY_PERSON, [
@@ -477,22 +546,22 @@
     ]);
   }
   if(!read(KEY_SETTING)){
-    write(KEY_SETTING, { name:'HCIS Smarthic', email:'admin@hcis.co.id', mode:'Production' });
+    write(KEY_SETTING, { name:'SmartHCIS', email:'admin@smarthcis.com', mode:'Production' });
   }
 
-  /* --------------------------
-     After login: init UI, listeners, render
-     -------------------------- */
+  /* ===========================
+     After login initialisation
+     =========================== */
   let attendanceChart = null;
   function initAfterLogin(){
-    // show dashboard
+    // show default page
     showPage('dashboard');
 
-    // populate counts
+    // update KPIs
     document.getElementById('k_total').textContent = (read(KEY_PERSON) || []).length;
     document.getElementById('k_training').textContent = (read(KEY_SURVEY) || []).length;
 
-    // render
+    // render lists & charts
     renderAttendanceChart();
     renderPersonalList();
     renderPRList();
@@ -500,24 +569,30 @@
     renderValidation();
     renderPerformanceList();
 
-    // attach listeners
+    // attach listeners for app actions
     attachAppListeners();
+
+    // load settings into form
+    const st = read(KEY_SETTING) || {};
+    document.getElementById('s_name').value = st.name || '';
+    document.getElementById('s_email').value = st.email || '';
+    document.getElementById('s_mode').value = st.mode || 'Production';
   }
 
   function attachAppListeners(){
-    // PERSONAL: open add modal
-    document.getElementById('btnAddPerson').addEventListener('click', () => {
+    // Personal add
+    document.getElementById('btnAddPerson')?.addEventListener('click', () => {
       document.getElementById('personForm').reset();
       document.getElementById('person_index').value = '';
       document.getElementById('personModalTitle').textContent = 'Tambah Karyawan';
       new bootstrap.Modal(document.getElementById('personModal')).show();
     });
 
-    // personal export
-    document.getElementById('exportPersonal').addEventListener('click', () => exportCSV(KEY_PERSON, 'personal.csv'));
+    // export personal CSV
+    document.getElementById('exportPersonal')?.addEventListener('click', () => exportCSV(KEY_PERSON, 'personal.csv'));
 
     // person form submit (add/edit)
-    document.getElementById('personForm').addEventListener('submit', (e) => {
+    document.getElementById('personForm')?.addEventListener('submit', (e) => {
       e.preventDefault();
       const idx = document.getElementById('person_index').value;
       const nik = document.getElementById('person_nik').value.trim();
@@ -534,13 +609,11 @@
       document.getElementById('k_total').textContent = arr.length;
     });
 
-    // PR: realtime total update
-    ['pr_qty','pr_price'].forEach(id => {
-      document.getElementById(id).addEventListener('input', updatePRTotalDisplay);
-    });
+    // PR total live update
+    ['pr_qty','pr_price'].forEach(id => { document.getElementById(id)?.addEventListener('input', updatePRTotalDisplay); });
 
-    // PR form submit (add)
-    document.getElementById('prForm').addEventListener('submit', (e) => {
+    // PR add
+    document.getElementById('prForm')?.addEventListener('submit', (e) => {
       e.preventDefault();
       const item = document.getElementById('pr_item').value.trim();
       const qty = parseInt(document.getElementById('pr_qty').value) || 0;
@@ -557,10 +630,10 @@
       renderPRList();
     });
 
-    // PR export
-    document.getElementById('exportPR').addEventListener('click', () => exportCSV(KEY_PR, 'pr_list.csv'));
+    // export PR
+    document.getElementById('exportPR')?.addEventListener('click', () => exportCSV(KEY_PR, 'pr_list.csv'));
 
-    // create survey
+    // create survey (dummy)
     document.getElementById('createSurvey')?.addEventListener('click', () => {
       const arr = read(KEY_SURVEY) || [];
       arr.push({ title:'Survei Baru', deadline:'- - -', progress:0 });
@@ -570,30 +643,31 @@
     // settings save
     document.getElementById('settingForm')?.addEventListener('submit', (e) => {
       e.preventDefault();
-      const d = { name: document.getElementById('s_name').value.trim(), email:document.getElementById('s_email').value.trim(), mode:document.getElementById('s_mode').value };
+      const d = { name: document.getElementById('s_name').value.trim(), email: document.getElementById('s_email').value.trim(), mode: document.getElementById('s_mode').value };
       write(KEY_SETTING, d); showToast('Sukses','Setting disimpan','success');
     });
 
-    // export demo (top-right)
-    document.getElementById('exportAllBtn').addEventListener('click', ()=> {
+    // export demo top-right
+    document.getElementById('exportAllBtn')?.addEventListener('click', ()=> {
       exportCSV(KEY_PERSON,'personal.csv');
       exportCSV(KEY_PR,'pr_list.csv');
       showToast('Selesai','Export demo: personal + PR','success');
     });
 
     // quick new PR focus
-    document.getElementById('btnNewPR').addEventListener('click', ()=> {
+    document.getElementById('btnNewPR')?.addEventListener('click', ()=> {
       showPage('payroll');
       document.getElementById('pr_item').focus();
     });
   }
 
-  /* --------------------------
-     Personal: render, view, edit, delete
-     -------------------------- */
+  /* ===========================
+     Personal CRUD functions
+     =========================== */
   function renderPersonalList(){
     const arr = read(KEY_PERSON) || [];
     const tbody = document.getElementById('personalTBody');
+    if(!tbody) return;
     tbody.innerHTML = arr.map((p,i)=>`
       <tr>
         <td>${escapeHtml(p.nik)}</td>
@@ -607,6 +681,7 @@
         </td>
       </tr>
     `).join('');
+    document.getElementById('k_total').textContent = arr.length;
   }
 
   window.viewPerson = function(i){
@@ -633,12 +708,11 @@
     if(!confirm('Hapus data karyawan ini?')) return;
     const arr = read(KEY_PERSON) || []; arr.splice(i,1); write(KEY_PERSON, arr);
     renderPersonalList(); showToast('Sukses','Karyawan dihapus','success');
-    document.getElementById('k_total').textContent = arr.length;
   };
 
-  /* --------------------------
-     PR: render, edit, delete
-     -------------------------- */
+  /* ===========================
+     PR functions
+     =========================== */
   function updatePRTotalDisplay(){
     const q = +document.getElementById('pr_qty').value || 0;
     const p = +document.getElementById('pr_price').value || 0;
@@ -648,6 +722,7 @@
   function renderPRList(){
     const arr = read(KEY_PR) || [];
     const tbody = document.getElementById('prTBody');
+    if(!tbody) return;
     tbody.innerHTML = arr.map((r,i)=>`
       <tr>
         <td>${i+1}</td>
@@ -680,8 +755,7 @@
     renderPRList(); showToast('Sukses','Item PR dihapus','success');
   };
 
-  // PR edit submit
-  document.getElementById('prEditForm').addEventListener('submit', (e) => {
+  document.getElementById('prEditForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const idx = parseInt(document.getElementById('pr_edit_index').value);
     const item = document.getElementById('e_pr_item').value.trim();
@@ -694,9 +768,9 @@
     renderPRList(); showToast('Sukses','PR diperbarui','success');
   });
 
-  /* --------------------------
-     Surveys & Validation (dashboard)
-     -------------------------- */
+  /* ===========================
+     Surveys & validation rendering
+     =========================== */
   function renderSurveys(){
     const arr = read(KEY_SURVEY) || [];
     const tbody = document.getElementById('surveysTBody');
@@ -719,29 +793,31 @@
     ];
     const totals = [8,0,0,1150,1,0,189];
     const tbody = document.getElementById('validationFullTBody');
+    if(!tbody) return;
     tbody.innerHTML = items.map((it,i)=>{
-      const statusOk = (totals[i] === 0);
-      const badge = statusOk ? '<span class="badge bg-info">OK</span>' : '<span class="badge bg-danger">Not OK</span>';
+      const ok = (totals[i] === 0);
+      const badge = ok ? '<span class="badge bg-info">OK</span>' : '<span class="badge bg-danger">Not OK</span>';
       return `<tr><td>${i+1}</td><td>${escapeHtml(it)}</td><td>${totals[i]}</td><td>${badge}</td><td><button class="btn btn-sm btn-outline-primary" onclick="alert('View detail: ${escapeHtml(it)}')">View</button></td></tr>`;
     }).join('');
   }
 
-  /* --------------------------
+  /* ===========================
      Charts: attendance & performance
-     -------------------------- */
+     =========================== */
   function renderAttendanceChart(){
-    const ctx = document.getElementById('attendanceChart').getContext('2d');
+    const ctx = document.getElementById('attendanceChart')?.getContext('2d');
+    if(!ctx) return;
     if(attendanceChart) attendanceChart.destroy();
     attendanceChart = new Chart(ctx, {
       type: 'line',
       data: {
         labels: ['Sen','Sel','Rab','Kam','Jum'],
-        datasets: [{ label:'Kehadiran (%)', data:[95,97,93,98,96], borderColor: 'rgba(13,110,253,0.95)', backgroundColor:'rgba(13,110,253,0.12)', fill:true, tension:0.3 }]
+        datasets: [{ label:'Kehadiran (%)', data:[95,97,93,98,96], borderColor: 'rgba(11,77,245,0.95)', backgroundColor:'rgba(11,77,245,0.12)', fill:true, tension:0.3 }]
       },
       options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, max:100 }, x:{ grid:{ display:false } } } }
     });
 
-    document.getElementById('attendanceRange').addEventListener('change', function(e){
+    document.getElementById('attendanceRange')?.addEventListener('change', function(e){
       if(e.target.value === 'month'){
         attendanceChart.data.labels = ['W1','W2','W3','W4'];
         attendanceChart.data.datasets[0].data = [94,95,96,96];
@@ -755,21 +831,22 @@
 
   function renderPerformanceList(){
     const top = ['Rina S — 95','Firza A — 92','Bima — 90','Sinta — 89','Anto — 87'];
-    document.getElementById('topEmployees').innerHTML = top.map(t=>`<li>${t}</li>`).join('');
+    const el = document.getElementById('topEmployees'); if(el) el.innerHTML = top.map(t=>`<li>${t}</li>`).join('');
   }
 
   function renderPerformanceChart(){
-    const ctx = document.getElementById('performanceChart').getContext('2d');
+    const c = document.getElementById('performanceChart'); if(!c) return;
+    const ctx = c.getContext('2d');
     new Chart(ctx, {
       type:'bar',
-      data:{ labels:['Jan','Feb','Mar','Apr','May','Jun'], datasets:[{ label:'Rata-rata Score', data:[78,81,83,79,85,87], backgroundColor:'rgba(13,110,253,0.75)' }] },
+      data:{ labels:['Jan','Feb','Mar','Apr','May','Jun'], datasets:[{ label:'Rata-rata Score', data:[78,81,83,79,85,87], backgroundColor:'rgba(11,77,245,0.82)' }] },
       options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, max:100 } } }
     });
   }
 
-  /* --------------------------
-     Export CSV util
-     -------------------------- */
+  /* ===========================
+     CSV Export utility
+     =========================== */
   function exportCSV(key, filename){
     const arr = read(key) || [];
     if(!arr.length){ showToast('Info','Tidak ada data untuk diexport','error'); return; }
@@ -781,37 +858,27 @@
     showToast('Sukses','Export CSV berhasil','success');
   }
 
-  /* --------------------------
-     Small inits & bindings
-     -------------------------- */
-  // render/update helpers
-  function renderAllLists(){
-    renderPersonalList(); renderPRList(); renderSurveys(); renderValidation(); renderPerformanceList();
+  /* ===========================
+     Initialize when logged in
+     =========================== */
+  if(localStorage.getItem(LOGIN_KEY) === '1'){
+    // if user refreshes while logged in, init UI
+    loginPage.style.display = 'none';
+    app.style.display = 'flex';
+    app.setAttribute('aria-hidden','false');
+    initAfterLogin();
   }
 
-  // Bind PR total live for edit modal fields too (optional)
-  document.getElementById('e_pr_qty')?.addEventListener('input', ()=> {});
-  document.getElementById('e_pr_price')?.addEventListener('input', ()=> {});
-
-  // PR initial render and personal initial render
-  function renderPRListInitial(){
-    renderPRList();
-    updatePRTotalDisplay();
-  }
-
-  // ensure PR rendering function exists when script executes
-  try { renderPRList(); } catch(e) {}
-
-  // Call initial render if already logged in
-  if(localStorage.getItem(LOGIN_KEY) === '1'){ initAfterLogin(); }
-
-  // keyboard shortcuts (optional)
+  // convenience: close modals with Escape
   document.addEventListener('keydown', (e) => {
-    if(e.key === 'Escape'){ // close modals if any open
-      document.querySelectorAll('.modal.show').forEach(m => bootstrap.Modal.getInstance(m)?.hide());
-    }
+    if(e.key === 'Escape'){ document.querySelectorAll('.modal.show').forEach(m => bootstrap.Modal.getInstance(m)?.hide()); }
   });
 
+  // small fallback: update PR total on load if fields present
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('pr_qty')?.addEventListener('input', updatePRTotalDisplay);
+    document.getElementById('pr_price')?.addEventListener('input', updatePRTotalDisplay);
+  });
   </script>
 </body>
 </html>
