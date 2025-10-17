@@ -254,26 +254,179 @@
         </div>
       </section>
 
-      <!-- PERSONAL -->
-      <section id="page-personal" class="page" hidden>
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <div>
-            <h2 class="mb-0">Personal Administration</h2>
-            <div class="muted">Kelola data karyawan</div>
+      <!-- PROFILE -->
+<section id="page-profile" class="page" hidden>
+  <div class="profile-container">
+    <div class="profile-banner"></div>
+    <div class="profile-card shadow-sm">
+      <div class="text-center position-relative">
+        <img id="profileAvatar" src="https://randomuser.me/api/portraits/lego/1.jpg"
+             alt="User Avatar" class="profile-avatar">
+        <input type="file" id="avatarInput" accept="image/*" hidden>
+        <button id="btnChangeAvatar" class="btn btn-sm btn-light rounded-pill shadow-sm position-absolute"
+          style="top:100%; left:50%; transform:translate(-50%, 10px);">
+          <i class="bi bi-camera"></i>
+        </button>
+      </div>
+
+      <div class="mt-5 text-center">
+        <h3 class="fw-bold text-primary">My Profile</h3>
+      </div>
+
+      <form id="profileForm" class="mt-3 px-4">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="profileName" class="form-control" value="Admin SmartHCIS" readonly>
           </div>
-          <div>
-            <button id="exportPersonal" class="btn btn-brand-outline btn-sm me-2"><i class="bi bi-download"></i> Export CSV</button>
-            <button id="btnAddPerson" class="btn btn-brand btn-sm"><i class="bi bi-plus-lg"></i> Tambah Karyawan</button>
+          <div class="col-md-6">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="profileEmail" class="form-control" value="admin@smarthcis.com" readonly>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Role</label>
+            <input type="text" id="profileRole" class="form-control" value="System Administrator" readonly>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Joined</label>
+            <input type="text" id="profileJoin" class="form-control" value="12 March 2023" readonly>
           </div>
         </div>
 
-        <div class="card p-3 card-radius">
-          <table class="table table-hover mb-0">
-            <thead class="table-light"><tr><th>NIK</th><th>Nama</th><th>Divisi</th><th>Jabatan</th><th style="width:160px">Aksi</th></tr></thead>
-            <tbody id="personalTBody"></tbody>
-          </table>
+        <div class="mt-4 text-center">
+          <button type="button" id="editBtn" class="btn btn-primary px-4 me-2">
+            <i class="bi bi-pencil"></i> Edit Profile
+          </button>
+          <button type="submit" id="saveBtn" class="btn btn-success px-4 me-2" hidden>
+            <i class="bi bi-save"></i> Save
+          </button>
+          <button type="button" id="cancelBtn" class="btn btn-secondary px-4 me-2" hidden>
+            <i class="bi bi-x-circle"></i> Cancel
+          </button>
+          <button type="button" id="logoutBtn" class="btn btn-outline-danger px-4">
+            <i class="bi bi-box-arrow-right"></i> Logout
+          </button>
         </div>
-      </section>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- STYLE -->
+<style>
+  #page-profile {
+    animation: fadeIn 0.4s ease;
+  }
+
+  .profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1rem;
+  }
+
+  .profile-banner {
+    width: 100%;
+    height: 120px;
+    background: linear-gradient(90deg, #002b5c, #0056b3);
+    border-radius: 0 0 40px 40px;
+  }
+
+  .profile-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 2rem 1rem;
+    width: 90%;
+    max-width: 700px;
+    margin-top: -60px;
+  }
+
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 4px solid white;
+    object-fit: cover;
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
+<!-- SCRIPT -->
+<script>
+  const editBtn = document.getElementById('editBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const profileForm = document.getElementById('profileForm');
+  const avatarInput = document.getElementById('avatarInput');
+  const profileAvatar = document.getElementById('profileAvatar');
+  const btnChangeAvatar = document.getElementById('btnChangeAvatar');
+
+  // Load data dari localStorage jika ada
+  window.addEventListener('load', () => {
+    const saved = JSON.parse(localStorage.getItem('userProfile'));
+    if (saved) {
+      document.getElementById('profileName').value = saved.name;
+      document.getElementById('profileEmail').value = saved.email;
+      document.getElementById('profileRole').value = saved.role;
+      document.getElementById('profileJoin').value = saved.joined;
+      profileAvatar.src = saved.avatar;
+    }
+  });
+
+  // Mode Edit
+  editBtn.addEventListener('click', () => {
+    [...profileForm.querySelectorAll('input')].forEach(input => input.removeAttribute('readonly'));
+    editBtn.hidden = true;
+    saveBtn.hidden = false;
+    cancelBtn.hidden = false;
+  });
+
+  // Simpan Perubahan
+  profileForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const data = {
+      name: document.getElementById('profileName').value,
+      email: document.getElementById('profileEmail').value,
+      role: document.getElementById('profileRole').value,
+      joined: document.getElementById('profileJoin').value,
+      avatar: profileAvatar.src
+    };
+    localStorage.setItem('userProfile', JSON.stringify(data));
+    alert('✅ Profil berhasil disimpan!');
+    cancelEditMode();
+  });
+
+  // Batal edit
+  cancelBtn.addEventListener('click', cancelEditMode);
+  function cancelEditMode() {
+    [...profileForm.querySelectorAll('input')].forEach(input => input.setAttribute('readonly', true));
+    editBtn.hidden = false;
+    saveBtn.hidden = true;
+    cancelBtn.hidden = true;
+  }
+
+  // Ganti avatar
+  btnChangeAvatar.addEventListener('click', () => avatarInput.click());
+  avatarInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (ev) {
+        profileAvatar.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+</script>
+
 
       <!-- PURCHASE REQUISITION -->
       <section id="page-payroll" class="page" hidden>
@@ -311,16 +464,195 @@
       </section>
 
       <!-- TRAINING -->
-      <section id="page-training" class="page" hidden>
-        <h2 class="mb-3">Training Development</h2>
-        <div class="card p-3 card-radius">
-          <div class="row g-3">
-            <div class="col-md-4"><div class="p-3"><h6>Leadership Training</h6><p class="muted small">Durasi: 3 hari</p></div></div>
-            <div class="col-md-4"><div class="p-3"><h6>Data Analyst Workshop</h6><p class="muted small">Durasi: 2 hari</p></div></div>
-            <div class="col-md-4"><div class="p-3"><h6>Onboarding New Joiner</h6><p class="muted small">Durasi: 1 hari</p></div></div>
-          </div>
-        </div>
-      </section>
+<section id="page-training" class="page" hidden>
+  <h2 class="text-center mb-4 text-primary fw-bold">Training Development</h2>
+  <p class="text-center text-muted mb-5">Pelatihan dan pengembangan karyawan untuk meningkatkan kompetensi.</p>
+
+  <div class="training-grid">
+    <div class="training-card">
+      <div class="training-icon">
+        <i class="bi bi-award"></i>
+      </div>
+      <h5>Leadership Training</h5>
+      <p>Durasi: 3 hari</p>
+      <button class="btn-training" data-title="Leadership Training" data-desc="Pelatihan ini fokus pada pengembangan kemampuan memimpin tim dan komunikasi efektif dalam organisasi.">Lihat Detail</button>
+    </div>
+
+    <div class="training-card">
+      <div class="training-icon bg-blue-light">
+        <i class="bi bi-bar-chart-line"></i>
+      </div>
+      <h5>Data Analyst Workshop</h5>
+      <p>Durasi: 2 hari</p>
+      <button class="btn-training" data-title="Data Analyst Workshop" data-desc="Workshop untuk memperkuat kemampuan analisis data menggunakan tools modern seperti Power BI dan Excel Advanced.">Lihat Detail</button>
+    </div>
+
+    <div class="training-card">
+      <div class="training-icon bg-green-light">
+        <i class="bi bi-person-plus"></i>
+      </div>
+      <h5>Onboarding New Joiner</h5>
+      <p>Durasi: 1 hari</p>
+      <button class="btn-training" data-title="Onboarding New Joiner" data-desc="Program pengenalan budaya kerja dan sistem SmartHCIS bagi karyawan baru agar cepat beradaptasi.">Lihat Detail</button>
+    </div>
+  </div>
+
+  <!-- Modal Detail -->
+  <div id="trainingModal" class="training-modal" hidden>
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h4 id="modalTitle"></h4>
+      <p id="modalDesc"></p>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Grid Layout */
+  .training-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 25px;
+    padding: 0 20px;
+  }
+
+  .training-card {
+    background: linear-gradient(145deg, #ffffff, #f1f6ff);
+    border: 1px solid #e1e8f0;
+    border-radius: 18px;
+    padding: 25px 20px;
+    text-align: center;
+    transition: all 0.4s ease;
+    box-shadow: 0 6px 12px rgba(0, 60, 130, 0.08);
+  }
+
+  .training-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 25px rgba(0, 60, 130, 0.18);
+    background: linear-gradient(145deg, #f5f9ff, #ffffff);
+  }
+
+  .training-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #003d99, #007bff);
+    color: #fff;
+    font-size: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+  }
+
+  .bg-blue-light {
+    background: linear-gradient(135deg, #007bff, #1e90ff);
+  }
+
+  .bg-green-light {
+    background: linear-gradient(135deg, #00b894, #00cec9);
+  }
+
+  .training-card h5 {
+    color: #003366;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+
+  .training-card p {
+    color: #6c757d;
+    margin-bottom: 15px;
+  }
+
+  .btn-training {
+    background: linear-gradient(90deg, #0056b3, #007bff);
+    border: none;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 18px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .btn-training:hover {
+    background: linear-gradient(90deg, #007bff, #00a2ff);
+    transform: translateY(-2px);
+  }
+
+  /* Modal Styling */
+  .training-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .modal-content {
+    background: #fff;
+    padding: 25px 30px;
+    border-radius: 14px;
+    max-width: 480px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 40, 100, 0.2);
+    animation: slideUp 0.5s ease;
+  }
+
+  .close-modal {
+    position: absolute;
+    top: 15px;
+    right: 22px;
+    font-size: 22px;
+    color: #555;
+    cursor: pointer;
+  }
+
+  .modal-content h4 {
+    color: #003366;
+    margin-bottom: 10px;
+  }
+
+  .modal-content p {
+    color: #444;
+    line-height: 1.6;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+</style>
+
+<script>
+  // Training Modal Logic
+  const modal = document.getElementById("trainingModal");
+  const closeModal = modal.querySelector(".close-modal");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalDesc = document.getElementById("modalDesc");
+
+  document.querySelectorAll(".btn-training").forEach(btn => {
+    btn.addEventListener("click", () => {
+      modalTitle.textContent = btn.dataset.title;
+      modalDesc.textContent = btn.dataset.desc;
+      modal.hidden = false;
+    });
+  });
+
+  closeModal.addEventListener("click", () => modal.hidden = true);
+  modal.addEventListener("click", e => {
+    if (e.target === modal) modal.hidden = true;
+  });
+</script>
+
 
       <!-- PERFORMANCE -->
       <section id="page-performance" class="page" hidden>
@@ -345,28 +677,188 @@
       </section>
 
       <!-- SETTING -->
-      <section id="page-setting" class="page" hidden>
-        <h2 class="mb-3">System Setting</h2>
-        <div class="card p-3 card-radius">
-          <form id="settingForm" class="row g-3">
-            <div class="col-md-6"><label class="form-label">Nama Sistem</label><input id="s_name" class="form-control"></div>
-            <div class="col-md-6"><label class="form-label">Email Admin</label><input id="s_email" type="email" class="form-control"></div>
-            <div class="col-md-4"><label class="form-label">Mode</label><select id="s_mode" class="form-select"><option>Production</option><option>Testing</option><option>Development</option></select></div>
-            <div class="col-12 text-end"><button class="btn btn-brand" type="submit">Simpan Setting</button></div>
-          </form>
+<section id="page-setting" class="page" hidden>
+  <div class="page-header mb-4 d-flex align-items-center justify-content-between">
+    <div>
+      <h2 class="fw-bold mb-1 text-primary">System Setting</h2>
+      <p class="text-muted small mb-0">Atur konfigurasi sistem SmartHCIS Anda</p>
+    </div>
+    <div class="rounded-circle bg-light shadow-sm p-3">
+      <i class="fas fa-cog fa-lg text-primary"></i>
+    </div>
+  </div>
+
+  <div class="card p-4 card-radius shadow-sm border-0" style="background: #ffffff;">
+    <form id="settingForm" class="row g-4">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Nama Sistem</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light"><i class="fas fa-desktop text-primary"></i></span>
+          <input id="s_name" class="form-control" placeholder="Contoh: SmartHCIS Production">
         </div>
-      </section>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Email Admin</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light"><i class="fas fa-envelope text-primary"></i></span>
+          <input id="s_email" type="email" class="form-control" placeholder="admin@smarthcis.com">
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Mode Sistem</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light"><i class="fas fa-layer-group text-primary"></i></span>
+          <select id="s_mode" class="form-select">
+            <option>Production</option>
+            <option>Testing</option>
+            <option>Development</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="col-12 text-end mt-4">
+        <button class="btn btn-primary px-4 shadow-sm" type="submit">
+          <i class="fas fa-save me-2"></i> Simpan Setting
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<style>
+  #page-setting .page-header h2 {
+    font-size: 1.6rem;
+  }
+
+  #page-setting .card {
+    transition: all 0.3s ease;
+  }
+
+  #page-setting .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 20px rgba(0, 100, 255, 0.08);
+  }
+
+  #page-setting .input-group-text {
+    border-right: 0;
+  }
+
+  #page-setting input:focus,
+  #page-setting select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #0066cc, #0099ff);
+    border: none;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #005bb5, #008ae6);
+  }
+</style>
+
 
       <!-- PROFILE -->
-      <section id="page-profile" class="page" hidden>
-        <h2 class="mb-3">Profile</h2>
-        <div class="card p-3 card-radius">
-          <p><strong>Nama:</strong> <span id="profileName">Admin SmartHCIS</span></p>
-          <p><strong>Email:</strong> <span id="profileEmail">admin@smarthcis.com</span></p>
-        </div>
-      </section>
-    </main>
+<section id="page-profile" class="page" hidden>
+  <div class="profile-header">
+    <div class="profile-banner"></div>
+    <div class="profile-avatar">
+      <img src="https://i.ibb.co/0n3qZBt/user-blue.png" alt="User Avatar">
+    </div>
   </div>
+
+  <div class="profile-card card p-4 shadow-sm fade-in">
+    <h2 class="fw-bold text-center mb-3 text-primary">My Profile</h2>
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <p class="mb-1 text-muted small">Full Name</p>
+        <h5 id="profileName" class="fw-semibold">Admin SmartHCIS</h5>
+      </div>
+      <div class="col-md-6">
+        <p class="mb-1 text-muted small">Email Address</p>
+        <h5 id="profileEmail" class="fw-semibold">admin@smarthcis.com</h5>
+      </div>
+      <div class="col-md-6">
+        <p class="mb-1 text-muted small">Role</p>
+        <h5 class="fw-semibold text-success">System Administrator</h5>
+      </div>
+      <div class="col-md-6">
+        <p class="mb-1 text-muted small">Joined</p>
+        <h5 class="fw-semibold">12 March 2023</h5>
+      </div>
+    </div>
+
+    <div class="text-center">
+      <button class="btn btn-primary me-2 px-4"><i class="bi bi-pencil-square"></i> Edit Profile</button>
+      <button class="btn btn-outline-danger px-4"><i class="bi bi-box-arrow-right"></i> Logout</button>
+    </div>
+  </div>
+</section>
+
+<!-- Tambahkan di <style> kamu -->
+<style>
+/* ===== PROFILE SECTION ===== */
+.profile-header {
+  position: relative;
+  text-align: center;
+  margin-bottom: 80px;
+}
+.profile-banner {
+  background: linear-gradient(135deg, #003366, #007bff);
+  height: 160px;
+  border-radius: 0 0 30px 30px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+.profile-avatar {
+  position: absolute;
+  bottom: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  padding: 5px;
+  background: white;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+.profile-avatar img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+}
+.profile-card {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 20px;
+  border: none;
+}
+.fade-in {
+  animation: fadeIn 0.7s ease;
+}
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(10px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+.btn-primary {
+  background-color: #007bff;
+  border: none;
+  border-radius: 10px;
+}
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+.btn-outline-danger {
+  border-radius: 10px;
+  transition: all 0.3s;
+}
+.btn-outline-danger:hover {
+  background: #dc3545;
+  color: #fff;
+}
+</style>
 
   <!-- Toast container -->
   <div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="true"></div>
