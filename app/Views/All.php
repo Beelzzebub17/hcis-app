@@ -5,11 +5,9 @@
   <title>SmartHCIS — Final</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-  <!-- Bootstrap CSS + Icons (CDN) -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -137,10 +135,8 @@
 </head>
 <body>
 
-  <!-- ===== LOGIN PAGE ===== -->
   <div id="loginPage" class="login-page" aria-hidden="false">
     <div class="login-card" role="main" aria-labelledby="loginTitle">
-      <!-- SVG "H" Logo (futuristic) -->
       <div class="login-logo mx-auto" aria-hidden="true">
         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SmartHCIS logo">
           <defs>
@@ -182,12 +178,9 @@
     </div>
   </div>
 
-  <!-- ===== APP (hidden until login) ===== -->
   <div id="app" class="app-wrap" style="display:none;" aria-hidden="true">
-    <!-- Sidebar -->
     <aside class="sidebar" role="navigation" aria-label="Main menu">
       <div class="brand" role="banner">
-        <!-- small SVG variant -->
         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <defs>
             <linearGradient id="lgS" x1="0" x2="1"><stop offset="0" stop-color="#79b8ff"/><stop offset="1" stop-color="#0b4df5"/></linearGradient>
@@ -221,9 +214,7 @@
       <div class="sidebar-footer">© 2025 SmartHCIS</div>
     </aside>
 
-    <!-- Main content -->
     <main class="content" role="main">
-      <!-- DASHBOARD -->
       <section id="page-dashboard" class="page active" aria-labelledby="dashTitle">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <div>
@@ -254,8 +245,67 @@
         </div>
       </section>
 
-      <!-- PROFILE -->
-<section id="page-profile" class="page" hidden>
+      <section id="page-personal" class="page" hidden aria-labelledby="personalTitle">
+        <h2 id="personalTitle" class="mb-3 fw-bold">Personal Administration</h2>
+        <div class="muted mb-4">Ringkasan data pribadi dan administrasi karyawan</div>
+
+        <div class="card p-4 card-radius shadow-sm border-0">
+          <div class="d-flex align-items-center gap-4 mb-4 border-bottom pb-4">
+            {{-- Placeholder Gambar Profil (Gunakan gambar dummy untuk demo) --}}
+            <img class="rounded-circle shadow"
+              src="https://randomuser.me/api/portraits/lego/1.jpg"
+              alt="Profile Picture" style="width: 90px; height: 90px; border: 4px solid var(--brand);">
+            <div>
+              <h4 class="fw-bold mb-0 text-blue-800">Joko Santoso</h4>
+              <div class="text-muted small">Senior HR Specialist</div>
+              <div class="small text-primary fw-semibold">ID Karyawan: SM-80801</div>
+            </div>
+          </div>
+
+          <h5 class="fw-bold text-primary mb-3 pb-2 border-bottom">My Profile Details</h5>
+          <div class="row g-4">
+            
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small fw-semibold">Email Address:</p>
+              <h6 class="fw-semibold text-gray-800">joko.s@smarthcis.com</h6>
+            </div>
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small fw-semibold">Department:</p>
+              <h6 class="fw-semibold text-gray-800">Human Capital</h6>
+            </div>
+            
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small fw-semibold">Phone Number:</p>
+              <h6 class="fw-semibold text-gray-800">+62 811 XXXX 555</h6>
+            </div>
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small fw-semibold">Direct Supervisor:</p>
+              <h6 class="fw-semibold text-gray-800">Budi Hartono</h6>
+            </div>
+
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small fw-semibold">Annual Leave Balance:</p>
+              <h6 class="fw-bolder text-success fs-5">12 Days</h6>
+            </div>
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small fw-semibold">Join Date:</p>
+              <h6 class="fw-semibold text-gray-800">2020-05-15</h6>
+            </div>
+            <div class="col-12">
+              <p class="mb-1 text-muted small fw-semibold">Home Address:</p>
+              <h6 class="fw-semibold text-gray-800">Jl. Merdeka No. 10, Jakarta Pusat</h6>
+            </div>
+          </div>
+
+          <div class="mt-5 text-end">
+            <button class="btn btn-brand px-4 shadow-sm" type="button" onclick="showToast('Info','Fungsi edit data pribadi belum diimplementasikan.','info')">
+              <i class="bi bi-pencil-square me-1"></i> Update Personal Data
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-profile" class="page" hidden>
   <div class="profile-container">
     <div class="profile-banner"></div>
     <div class="profile-card shadow-sm">
@@ -312,7 +362,6 @@
   </div>
 </section>
 
-<!-- STYLE -->
 <style>
   #page-profile {
     animation: fadeIn 0.4s ease;
@@ -359,7 +408,6 @@
   }
 </style>
 
-<!-- SCRIPT -->
 <script>
   const editBtn = document.getElementById('editBtn');
   const saveBtn = document.getElementById('saveBtn');
@@ -428,7 +476,6 @@
 </script>
 
 
-      <!-- PURCHASE REQUISITION -->
       <section id="page-payroll" class="page" hidden>
         <div class="d-flex justify-content-between align-items-center mb-3">
           <div>
@@ -463,8 +510,7 @@
         </div>
       </section>
 
-      <!-- TRAINING -->
-<section id="page-training" class="page" hidden>
+      <section id="page-training" class="page" hidden>
   <h2 class="text-center mb-4 text-primary fw-bold">Training Development</h2>
   <p class="text-center text-muted mb-5">Pelatihan dan pengembangan karyawan untuk meningkatkan kompetensi.</p>
 
@@ -497,7 +543,6 @@
     </div>
   </div>
 
-  <!-- Modal Detail -->
   <div id="trainingModal" class="training-modal" hidden>
     <div class="modal-content">
       <span class="close-modal">&times;</span>
@@ -654,7 +699,6 @@
 </script>
 
 
-      <!-- PERFORMANCE -->
       <section id="page-performance" class="page" hidden>
         <h2 class="mb-3">Performance Management</h2>
         <div class="card p-3 card-radius">
@@ -665,7 +709,6 @@
         </div>
       </section>
 
-      <!-- VALIDATION -->
       <section id="page-validation" class="page" hidden>
         <h2 class="mb-3">Payroll Data Validation</h2>
         <div class="card p-3 card-radius">
@@ -676,8 +719,7 @@
         </div>
       </section>
 
-      <!-- SETTING -->
-<section id="page-setting" class="page" hidden>
+      <section id="page-setting" class="page" hidden>
   <div class="page-header mb-4 d-flex align-items-center justify-content-between">
     <div>
       <h2 class="fw-bold mb-1 text-primary">System Setting</h2>
@@ -762,8 +804,7 @@
 </style>
 
 
-      <!-- PROFILE -->
-<section id="page-profile" class="page" hidden>
+      <section id="page-profile" class="page" hidden>
   <div class="profile-header">
     <div class="profile-banner"></div>
     <div class="profile-avatar">
@@ -799,7 +840,6 @@
   </div>
 </section>
 
-<!-- Tambahkan di <style> kamu -->
 <style>
 /* ===== PROFILE SECTION ===== */
 .profile-header {
@@ -860,10 +900,8 @@
 }
 </style>
 
-  <!-- Toast container -->
   <div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- ===== Modals (Person, View, PR edit) ===== -->
   <div class="modal fade" id="personModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <form id="personForm" class="modal-content">
@@ -911,7 +949,6 @@
     </div>
   </div>
 
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
