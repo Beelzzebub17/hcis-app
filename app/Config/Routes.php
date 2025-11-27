@@ -63,3 +63,12 @@ $routes->get('/system-setting/edit/(:num)', 'SystemSetting::edit/$1');
 $routes->post('/system-setting/update/(:num)', 'SystemSetting::update/$1');
 $routes->get('/system-setting/delete/(:num)', 'SystemSetting::delete/$1');
 
+// Chat API routes (backend scaffold)
+$routes->get('/api/chats', 'Chat::listChats');
+$routes->post('/api/chats', 'Chat::createChat');
+$routes->post('/api/messages', 'Chat::sendMessage');
+$routes->get('/api/messages/(:num)', 'Chat::getMessages/$1');
+$routes->post('/api/chats/assign/(:num)', 'Chat::assign/$1');
+$routes->post('/api/chats/status/(:num)', 'Chat::setStatus/$1');
+$routes->post('/api/chats/read/(:num)', 'Chat::markRead/$1');
+

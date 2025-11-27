@@ -206,6 +206,8 @@
         <li class="nav-item"><a class="nav-link" href="#" data-page="training"><i class="bi bi-award fs-5"></i><span>Training Dev</span></a></li>
         <li class="nav-item"><a class="nav-link" href="#" data-page="performance"><i class="bi bi-graph-up fs-5"></i><span>Performance</span></a></li>
         <li class="nav-item"><a class="nav-link" href="#" data-page="validation"><i class="bi bi-list-check fs-5"></i><span>Data Validation</span></a></li>
+        <!-- Chatbot moved to mini-toggle (no full page nav) -->
+        <li class="nav-item"><a class="nav-link" href="#" data-page="adminchat"><i class="bi bi-people fs-5"></i><span>Admin Chat</span></a></li>
         <li class="nav-item"><a class="nav-link" href="#" data-page="setting"><i class="bi bi-gear fs-5"></i><span>System Setting</span></a></li>
         <li class="nav-item"><a class="nav-link" href="#" data-page="profile"><i class="bi bi-person-circle fs-5"></i><span>Profile</span></a></li>
         <li class="nav-item mt-2"><a class="nav-link" id="logoutBtn" href="#" style="color:#fff"><i class="bi bi-box-arrow-right fs-5"></i><span>Logout</span></a></li>
@@ -244,6 +246,92 @@
           <canvas id="attendanceChart" height="140"></canvas>
         </div>
       </section>
+      <style>
+        .chat-container { display:flex; flex-direction:column; min-height:260px; }
+        .chat-messages { flex:1; overflow:auto; max-height:340px; padding:12px; background:#f8fbff; border-radius:10px; border:1px solid #e7f0ff; }
+        .msg { margin-bottom:10px; display:flex; gap:8px; align-items:flex-end; }
+        .msg .bubble { padding:10px 12px; border-radius:12px; max-width:80%; box-shadow:0 6px 14px rgba(6,14,40,0.04); }
+        .msg.user { justify-content:flex-end; }
+        .msg.user .bubble { background:linear-gradient(90deg,#3b82f6,#0b4df5); color:#fff; border-bottom-right-radius:6px; }
+        .msg.bot .bubble { background:#fff; color:#0b1a2b; border-bottom-left-radius:6px; border:1px solid #eef6ff; }
+        .chat-input-area .form-control { min-width:0; }
+        .chat-attachment { display:block; margin-top:6px; font-size:13px; color:#344055; }
+        .attachment-link { display:inline-block; margin-top:6px; background:#eef7ff; padding:6px 8px; border-radius:8px; font-size:13px; text-decoration:none; color:#0b4df5; }
+        /* Admin chat list */
+        #adminChatsList .list-group-item { cursor:pointer; display:flex; justify-content:space-between; align-items:center; }
+        #adminMessages .msg { margin-bottom:8px; }
+        .status-badge { font-size:12px; padding:4px 8px; border-radius:999px; }
+        /* Mini floating chat */
+        .mini-chat-toggle { position:fixed; right:24px; bottom:24px; z-index:1200; }
+        .mini-chat-btn { width:56px; height:56px; border-radius:999px; background:#0b4df5; color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 24px rgba(11,77,245,0.18); border:none; }
+        .mini-chat-badge { position:absolute; right:-6px; top:-6px; background:#ff3b30; color:#fff; font-size:12px; padding:4px 6px; border-radius:999px; box-shadow:0 4px 12px rgba(0,0,0,0.12); }
+        .mini-chat-panel { position:fixed; right:24px; bottom:96px; width:360px; max-width:90vw; height:480px; z-index:1200; display:flex; flex-direction:column; box-shadow:0 20px 50px rgba(6,14,40,0.2); border-radius:12px; overflow:hidden; background:#fff; }
+        .mini-chat-header { padding:10px 12px; background:linear-gradient(90deg,#0b4df5,#3b82f6); color:#fff; display:flex; align-items:center; justify-content:space-between; }
+        .mini-chat-body { padding:10px; flex:1; overflow:auto; background:#f8fbff; }
+        .mini-chat-footer { padding:10px; border-top:1px solid #eef6ff; display:flex; gap:8px; align-items:center; }
+        .mini-chat-panel.hidden { display:none; }
+        .mini-msg .bubble { padding:8px 10px; border-radius:10px; max-width:78%; }
+        .mini-msg.user { justify-content:flex-end; }
+        .mini-msg.user .bubble { background:linear-gradient(90deg,#3b82f6,#0b4df5); color:#fff; }
+        .mini-msg.bot .bubble { background:#fff; color:#0b1a2b; border:1px solid #eef6ff; }
+      </style>
+
+      <!-- Full chat page removed: chat is now available exclusively via the bottom-right mini toggle -->
+
+      <section id="page-adminchat" class="page" hidden aria-labelledby="adminChatTitle">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h2 id="adminChatTitle" class="mb-0">Admin — Chat Management (Demo)</h2>
+            <div class="muted">Daftar chat per divisi. Assign, balas, upload file, ubah status.</div>
+          </div>
+          <div>
+            <select id="adminFilterDiv" class="form-select form-select-sm w-auto">
+              <option value="all">All Divisions</option>
+              <option value="Finance">Finance</option>
+              <option value="HCIS">HCIS</option>
+              <option value="LDD">LDD</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="card p-2 card-radius" style="height:520px; overflow:auto">
+              <h6 class="mb-2">Chats</h6>
+              <ul id="adminChatsList" class="list-group"></ul>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="card p-3 card-radius" style="height:520px; display:flex; flex-direction:column">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                  <h6 id="adminChatTitleSelected">Pilih chat</h6>
+                  <div id="adminChatMeta" class="muted small">-</div>
+                </div>
+                <div class="d-flex gap-2">
+                  <button id="adminAssignBtn" class="btn btn-sm btn-outline-primary">Assign to me</button>
+                  <select id="adminStatusSel" class="form-select form-select-sm w-auto">
+                    <option value="open">Open</option>
+                    <option value="pending">Pending</option>
+                    <option value="solved">Solved</option>
+                  </select>
+                </div>
+              </div>
+              <div id="adminMessages" style="flex:1; overflow:auto; padding:8px; background:#f8fbff; border-radius:8px; border:1px solid #eef6ff"></div>
+
+              <div class="mt-2">
+                <div class="d-flex gap-2 mb-2">
+                  <input id="adminReplyInput" class="form-control" placeholder="Tulis jawaban...">
+                  <input id="adminFile" type="file" class="form-control" style="max-width:240px" />
+                  <button id="adminSendBtn" class="btn btn-brand">Kirim</button>
+                  <button id="adminOptionsBtn" class="btn btn-outline-secondary" style="margin-left:8px">Options</button>
+                </div>
+                <div class="small muted">Use <strong>Options</strong> to manage templates, quick replies, auto-reply and broadcast.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section id="page-personal" class="page" hidden aria-labelledby="personalTitle">
         <h2 id="personalTitle" class="mb-3 fw-bold">Personal Administration</h2>
@@ -251,7 +339,6 @@
 
         <div class="card p-4 card-radius shadow-sm border-0">
           <div class="d-flex align-items-center gap-4 mb-4 border-bottom pb-4">
-            {{-- Placeholder Gambar Profil (Gunakan gambar dummy untuk demo) --}}
             <img class="rounded-circle shadow"
               src="https://randomuser.me/api/portraits/lego/1.jpg"
               alt="Profile Picture" style="width: 90px; height: 90px; border: 4px solid var(--brand);">
@@ -948,8 +1035,46 @@
       </form>
     </div>
   </div>
+  <!-- Mini floating chat toggle (bottom-right) -->
+  <div class="mini-chat-toggle" aria-hidden="false">
+    <div style="position:relative">
+      <button id="miniChatBtn" class="mini-chat-btn" title="Chatbot">
+        <i class="bi bi-chat-dots" style="font-size:20px"></i>
+      </button>
+      <div id="miniChatBadge" class="mini-chat-badge" style="display:none">0</div>
+    </div>
+  </div>
+
+  <div id="miniChatPanel" class="mini-chat-panel hidden" aria-hidden="true">
+    <div class="mini-chat-header">
+      <div style="font-weight:700">Chatbot</div>
+      <div>
+        <button id="miniChatClose" class="btn btn-sm btn-light">Tutup</button>
+      </div>
+    </div>
+    <div class="mini-chat-body">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <select id="miniChatDivision" class="form-select form-select-sm" style="width:100%">
+          <option value="Finance">Finance</option>
+          <option value="HCIS">HCIS</option>
+          <option value="LDD">LDD</option>
+        </select>
+      </div>
+      <div id="miniChatMessages" class="mini-chat-body" style="padding:4px; background:transparent"></div>
+    </div>
+    <div class="mini-chat-footer">
+      <select id="miniChatType" class="form-select form-select-sm" style="max-width:120px;margin-right:6px">
+        <option value="general">General</option>
+        <option value="keluhan">Keluhan</option>
+      </select>
+      <input id="miniChatInput" class="form-control form-control-sm" placeholder="Tulis pesan..." aria-label="mini chat input">
+      <input id="miniChatFile" type="file" class="form-control form-control-sm" style="max-width:140px; margin-left:6px" aria-label="Attach file" />
+      <button id="miniChatSendBtn" class="btn btn-sm btn-brand">Kirim</button>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
 
   <script>
   /* ===========================
@@ -966,6 +1091,40 @@
   }
   function formatIDR(n){ return new Intl.NumberFormat('id-ID').format(n); }
   function escapeHtml(s=''){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+  // Socket.IO client (optional realtime)
+  const SOCKET_URL = 'http://localhost:3001';
+  let socket = null; let socketAvailable = false;
+  try{
+    if(typeof io !== 'undefined'){
+      socket = io(SOCKET_URL, { transports:['websocket','polling'] });
+      socket.on('connect', ()=>{ socketAvailable = true; showToast('Realtime','Connected to socket server','success',1200); });
+      socket.on('disconnect', ()=>{ socketAvailable = false; showToast('Realtime','Socket disconnected','error',1200); });
+      socket.on('new_message', (payload)=>{ handleSocketMessage(payload); });
+    }
+  }catch(e){ console.warn('Socket init failed', e.message); }
+
+  function handleSocketMessage(payload){
+    if(!payload) return;
+    // expected payload: { division, chatId, sender, text, attachments }
+    const div = payload.division || (payload.chatId ? null : 'Finance');
+    const raw = read(KEY_CHAT) || {};
+    const data = (function normalize(raw){ const out={}; Object.keys(raw||{}).forEach(k=>{ if(Array.isArray(raw[k])) out[k]={messages:raw[k],meta:{status:'open',assigned:'',rating:null,unread:0}}; else out[k]=raw[k]; }); ['Finance','HCIS','LDD'].forEach(d=>{ if(!out[d]) out[d]={messages:[],meta:{status:'open',assigned:'',rating:null,unread:0}} }); return out; })(raw);
+    // If payload has chatId, try to map; here we keep per-division lists
+    const targetDiv = payload.division || (div || 'Finance');
+    data[targetDiv].messages.push({ from: payload.sender || 'bot', text: payload.text || '', ts: Date.now(), attachments: payload.attachments || [] });
+    // if not viewing this division, increment unread
+    const viewing = document.querySelector('.nav-link.active')?.dataset?.page === 'chat' && document.getElementById('chatDivision')?.value === targetDiv;
+    if(!viewing) data[targetDiv].meta.unread = (data[targetDiv].meta.unread||0) + 1;
+    write(KEY_CHAT, data);
+    updateMiniBadge();
+    // render appropriately
+    if(document.querySelector('.nav-link.active')?.dataset?.page === 'chat'){
+      const cur = document.getElementById('chatDivision')?.value;
+      if(cur === targetDiv) renderChat();
+    }
+    if(document.querySelector('.nav-link.active')?.dataset?.page === 'adminchat') renderAdminList();
+  }
 
   /* ===========================
      Authentication (demo)
@@ -1034,6 +1193,8 @@
     requestAnimationFrame(()=> target.classList.add('active'));
     // update charts lazily
     if(id === 'performance') renderPerformanceChart();
+    if(id === 'chat') renderChat();
+    if(id === 'adminchat') renderAdminList();
   }
 
   // Logout
@@ -1054,6 +1215,7 @@
   const KEY_PR = 'smarthcis_pr';
   const KEY_SURVEY = 'smarthcis_survey';
   const KEY_SETTING = 'smarthcis_setting';
+  const KEY_CHAT = 'smarthcis_chat';
 
   if(!read(KEY_PERSON)){
     write(KEY_PERSON, [
@@ -1076,6 +1238,9 @@
   }
   if(!read(KEY_SETTING)){
     write(KEY_SETTING, { name:'SmartHCIS', email:'admin@smarthcis.com', mode:'Production' });
+  }
+  if(!read(KEY_CHAT)){
+    write(KEY_CHAT, { Finance: [], HCIS: [], LDD: [] });
   }
 
   /* ===========================
@@ -1187,6 +1352,23 @@
     document.getElementById('btnNewPR')?.addEventListener('click', ()=> {
       showPage('payroll');
       document.getElementById('pr_item').focus();
+    });
+
+    // Chat listeners
+    document.getElementById('chatDivision')?.addEventListener('change', renderChat);
+    document.getElementById('chatSendBtn')?.addEventListener('click', sendChat);
+    document.getElementById('chatInput')?.addEventListener('keydown', (e) => { if(e.key === 'Enter') sendChat(); });
+    document.getElementById('chatClearBtn')?.addEventListener('click', () => {
+      if(!confirm('Hapus percakapan untuk divisi ini?')) return;
+      const div = document.getElementById('chatDivision').value;
+      const raw = read(KEY_CHAT) || {};
+      // normalize existing shape then clear messages for selected division
+      if(Array.isArray(raw[div])) raw[div] = [];
+      else if(raw[div] && raw[div].messages) raw[div].messages = [];
+      else raw[div] = [];
+      write(KEY_CHAT, raw);
+      renderChat();
+      showToast('Sukses','Percakapan dibersihkan','success');
     });
   }
 
@@ -1388,6 +1570,335 @@
   }
 
   /* ===========================
+     Chatbot: render, send, auto-reply
+     =========================== */
+  // normalize chat storage into object: { Division: { messages:[], meta:{ status, assigned, rating, unread } } }
+  function normalizeChat(raw){
+    const out = {};
+    (raw && typeof raw === 'object') || (raw = {});
+    Object.keys(raw).forEach(k => {
+      if(Array.isArray(raw[k])) out[k] = { messages: raw[k], meta: { status:'open', assigned:'', rating:null, unread:0 } };
+      else if(raw[k] && Array.isArray(raw[k].messages)) out[k] = raw[k];
+      else out[k] = { messages: [], meta: { status:'open', assigned:'', rating:null, unread:0 } };
+    });
+    // ensure default divisions exist
+    ['Finance','HCIS','LDD'].forEach(d => { if(!out[d]) out[d] = { messages:[], meta:{ status:'open', assigned:'', rating:null, unread:0, autoReplyEnabled:false, autoReplyTemplate:'' } }; });
+    return out;
+  }
+
+  function renderChat(){
+    const div = document.getElementById('chatDivision')?.value || 'Finance';
+    const raw = read(KEY_CHAT) || {};
+    const data = normalizeChat(raw);
+    // persist normalized shape (helps when upgrading from older shape)
+    write(KEY_CHAT, data);
+    // join socket room for this division (if available)
+    if(socket && socketAvailable){ try{ socket.emit('join', { division: div }); } catch(e){ console.warn('socket join failed', e.message); } }
+    const chat = data[div] || { messages: [], meta: { status:'open', assigned:'', rating:null, unread:0 } };
+    const el = document.getElementById('chatMessages'); if(!el) return;
+    el.innerHTML = chat.messages.map(m => {
+      let attachments = '';
+      if(m.attachments && m.attachments.length){
+        attachments = m.attachments.map(a => `<div><a class=\"attachment-link\" href=\"${a.data}\" download=\"${escapeHtml(a.name)}\">📎 ${escapeHtml(a.name)}</a></div>`).join('');
+      }
+      const cls = m.from === 'user' ? 'user' : (m.from === 'admin' ? 'bot' : 'bot');
+      const typeLabel = m.type && m.type === 'keluhan' ? '<span class=\"badge bg-warning text-dark me-1 small\">Keluhan</span>' : '';
+      return `\n        <div class=\"msg ${cls}\">\n          <div class=\"bubble\">${typeLabel}${escapeHtml(m.text || '')}${attachments}</div>\n        </div>`;
+    }).join('');
+    el.scrollTop = el.scrollHeight;
+    // mark bot/admin messages as read locally
+    let changed = false;
+    chat.messages.forEach(m => { if(m.from !== 'user' && m.status !== 'read'){ m.status = 'read'; changed = true; } });
+    if(changed){ data[div] = chat; write(KEY_CHAT, data); }
+    // show rating UI if solved and not rated
+    const ratingEl = document.getElementById('chatRating'); if(ratingEl){
+      ratingEl.innerHTML = '';
+      if(chat.meta && chat.meta.status === 'solved'){
+        if(!chat.meta.rating){
+          ratingEl.innerHTML = `<div class=\"d-flex align-items-center gap-2\"><div class=\"small muted\">Rate support:</div><div id=\"ratingStars\">${[1,2,3,4,5].map(i=>`<button class=\"btn btn-sm btn-outline-secondary\" data-star=\"${i}\">${i}★</button>`).join('')}</div></div>`;
+          document.querySelectorAll('#ratingStars button').forEach(b => b.addEventListener('click', (e)=>{
+            const v = +e.currentTarget.dataset.star; chat.meta.rating = v; data[div] = chat; write(KEY_CHAT, data); showToast('Thanks','Terima kasih atas rating Anda','success'); renderChat();
+          }));
+        } else {
+          ratingEl.innerHTML = `<div class=\"small muted\">Rating Anda: <strong>${chat.meta.rating}★</strong></div>`;
+        }
+      }
+    }
+  }
+
+  function sendChat(){
+    const inp = document.getElementById('chatInput'); if(!inp) return;
+    const fileInput = document.getElementById('chatFile');
+    const txt = inp.value.trim();
+    if(!txt && (!fileInput || !fileInput.files || !fileInput.files.length)) return;
+    const div = document.getElementById('chatDivision')?.value || 'Finance';
+    const raw = read(KEY_CHAT) || {};
+    const data = normalizeChat(raw);
+    const type = document.getElementById('chatType')?.value || 'general';
+    const msg = { from: 'user', text: txt, ts: Date.now(), status: 'sent', attachments: [], type: type };
+    const pushAndNotify = () => {
+      data[div].messages.push(msg);
+      // increment unread for admin view if admin not viewing
+      const adminViewing = document.querySelector('.nav-link.active')?.dataset?.page === 'adminchat';
+      if(!adminViewing) data[div].meta.unread = (data[div].meta.unread || 0) + 1;
+      write(KEY_CHAT, data); renderChat(); updateMiniBadge(); inp.value = ''; if(fileInput) fileInput.value = null;
+      showToast('Terkirim','Pesan dikirim ke '+div,'success');
+      // if this is a complaint and auto-reply enabled, schedule admin auto-reply
+      try{ const meta = data[div].meta || {}; if(msg.type === 'keluhan' && meta.autoReplyEnabled && meta.autoReplyTemplate){ const adminMsg = { from:'admin', text: meta.autoReplyTemplate, ts: Date.now(), status:'sent', attachments:[] }; setTimeout(()=>{ const fresh = normalizeChat(read(KEY_CHAT)||{}); fresh[div].messages.push(adminMsg); fresh[div].meta.unread = (fresh[div].meta.unread||0) + 1; write(KEY_CHAT, fresh); renderChat(); updateMiniBadge(); if(socket && socketAvailable){ try{ socket.emit('send_message', { division: div, sender: 'admin', text: adminMsg.text, attachments: [] }); }catch(e){} } }, 600); } }catch(e){ console.warn('auto-reply check failed', e.message); }
+      // emit via socket if available
+      if(socket && socketAvailable){
+        try{ socket.emit('send_message', { division: div, sender: 'user', text: txt, attachments: msg.attachments, type: msg.type }); }
+        catch(e){ console.warn('socket emit failed', e.message); }
+      } else {
+        // fallback: local bot reply simulation
+        setTimeout(()=> botReply(div, txt), 800 + Math.floor(Math.random()*800));
+      }
+    };
+    if(fileInput && fileInput.files && fileInput.files[0]){
+      const f = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = function(ev){ msg.attachments.push({ name: f.name, type: f.type, size: f.size, data: ev.target.result }); pushAndNotify(); };
+      reader.readAsDataURL(f);
+    } else pushAndNotify();
+  }
+
+  function botReply(div, userText){
+    const canned = { Finance:['Terima kasih. Tim Finance menindaklanjuti.','Mohon lampirkan invoice pendukung.'], HCIS:['HCIS menerima pesan Anda.','Sertakan NIK untuk percepatan.'], LDD:['LDD mencatat kebutuhan teknis Anda.','Mohon jelaskan spesifikasi lebih detail.'] };
+    const pool = canned[div] || ['Terima kasih, pesan diterima.'];
+    const reply = pool[Math.floor(Math.random()*pool.length)];
+    const raw = read(KEY_CHAT) || {};
+    const data = normalizeChat(raw);
+    const botMsg = { from: 'bot', text: reply, ts: Date.now(), status: 'sent', attachments: [] };
+    data[div].messages.push(botMsg);
+    // mark unread for user if not viewing
+    const viewingUser = document.querySelector('.nav-link.active')?.dataset?.page === 'chat' && document.getElementById('chatDivision')?.value === div;
+    if(!viewingUser) data[div].meta.unread = (data[div].meta.unread || 0) + 1;
+    write(KEY_CHAT, data); renderChat(); if(!viewingUser){ showToast('Pesan Baru','Ada pesan dari '+div,'info',4000); flashTitle('Pesan baru — '+div); }
+    updateMiniBadge();
+  }
+
+  /* Mini chat helpers */
+  function updateMiniBadge(){
+    try{
+      const raw = read(KEY_CHAT) || {};
+      const data = normalizeChat(raw);
+      let total = 0; Object.keys(data).forEach(k=>{ total += (data[k].meta && data[k].meta.unread) ? data[k].meta.unread : 0; });
+      const b = document.getElementById('miniChatBadge'); if(!b) return;
+      if(total>0){ b.style.display='block'; b.textContent = total>99? '99+': String(total); } else b.style.display='none';
+    }catch(e){ console.warn('mini badge update', e.message); }
+  }
+
+  function renderMiniChat(){
+    const el = document.getElementById('miniChatMessages'); if(!el) return;
+    const div = document.getElementById('miniChatDivision')?.value || 'Finance';
+    const raw = read(KEY_CHAT) || {};
+    const data = normalizeChat(raw);
+    const chat = data[div] || { messages: [], meta: { status:'open', assigned:'', rating:null, unread:0 } };
+    // render last 40 messages
+    const msgs = chat.messages.slice(-40).map(m=>{
+      const cls = m.from === 'user' ? 'user' : (m.from === 'admin' ? 'bot' : 'bot');
+      let attachments = '';
+      if(m.attachments && m.attachments.length){ attachments = m.attachments.map(a=>`<div><a class="attachment-link" href="${a.data}" download="${escapeHtml(a.name)}">📎 ${escapeHtml(a.name)}</a></div>`).join(''); }
+      const typeLabel = m.type && m.type === 'keluhan' ? '<span class="badge bg-warning text-dark me-1 small">Keluhan</span>' : '';
+      return `<div class="mini-msg ${cls}"><div class="bubble">${typeLabel}${escapeHtml(m.text||'')}${attachments}</div></div>`;
+    }).join('');
+    el.innerHTML = msgs;
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function openMiniChat(){
+    const panel = document.getElementById('miniChatPanel'); if(!panel) return;
+    panel.classList.remove('hidden'); panel.setAttribute('aria-hidden','false'); document.getElementById('miniChatInput')?.focus();
+    // mark current division unread -> 0
+    try{ const div = document.getElementById('miniChatDivision')?.value || 'Finance'; const raw = read(KEY_CHAT)||{}; const data = normalizeChat(raw); if(data[div]){ data[div].meta.unread = 0; write(KEY_CHAT,data); } }catch(e){}
+    renderMiniChat(); updateMiniBadge();
+    if(socket && socketAvailable){ try{ socket.emit('join',{ division: document.getElementById('miniChatDivision')?.value || 'Finance' }); } catch(e){} }
+  }
+
+  function closeMiniChat(){ const panel = document.getElementById('miniChatPanel'); if(!panel) return; panel.classList.add('hidden'); panel.setAttribute('aria-hidden','true'); }
+
+  // Mini send (supports file attachments)
+  function miniSendChat(){
+    const inp = document.getElementById('miniChatInput'); if(!inp) return;
+    const fileInput = document.getElementById('miniChatFile');
+    const txt = inp.value.trim();
+    if(!txt && (!fileInput || !fileInput.files || !fileInput.files.length)) return;
+    const div = document.getElementById('miniChatDivision')?.value || 'Finance';
+    const raw = read(KEY_CHAT) || {};
+    const data = normalizeChat(raw);
+    const type = document.getElementById('miniChatType')?.value || 'general';
+    const msg = { from: 'user', text: txt, ts: Date.now(), status: 'sent', attachments: [], type: type };
+    const pushAndNotify = () => {
+      data[div].messages.push(msg);
+      const adminViewing = document.querySelector('.nav-link.active')?.dataset?.page === 'adminchat';
+      if(!adminViewing) data[div].meta.unread = (data[div].meta.unread || 0) + 1;
+      write(KEY_CHAT, data);
+      renderMiniChat(); inp.value = ''; if(fileInput) fileInput.value = null;
+      showToast('Terkirim','Pesan dikirim ke '+div,'success');
+      updateMiniBadge();
+      // auto-reply for complaints if enabled
+      try{ const meta = data[div].meta || {}; if(msg.type === 'keluhan' && meta.autoReplyEnabled && meta.autoReplyTemplate){ const adminMsg = { from:'admin', text: meta.autoReplyTemplate, ts: Date.now(), status:'sent', attachments:[] }; setTimeout(()=>{ const fresh = normalizeChat(read(KEY_CHAT)||{}); fresh[div].messages.push(adminMsg); fresh[div].meta.unread = (fresh[div].meta.unread||0) + 1; write(KEY_CHAT, fresh); renderMiniChat(); updateMiniBadge(); if(socket && socketAvailable){ try{ socket.emit('send_message', { division: div, sender: 'admin', text: adminMsg.text, attachments: [] }); }catch(e){} } }, 600); } }catch(e){ console.warn('auto-reply failed', e.message); }
+      if(socket && socketAvailable){ try{ socket.emit('send_message', { division: div, sender: 'user', text: msg.text, attachments: msg.attachments, type: msg.type }); } catch(e){ console.warn('socket emit failed', e.message); } }
+      else setTimeout(()=> botReply(div, msg.text), 800 + Math.floor(Math.random()*800));
+    };
+    if(fileInput && fileInput.files && fileInput.files[0]){
+      const f = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = function(ev){ msg.attachments.push({ name: f.name, type: f.type, size: f.size, data: ev.target.result }); pushAndNotify(); };
+      reader.readAsDataURL(f);
+    } else pushAndNotify();
+  }
+
+  // Wire mini controls
+  document.addEventListener('click', (e)=>{
+    if(e.target && e.target.id === 'miniChatBtn'){
+      const panel = document.getElementById('miniChatPanel'); if(panel && !panel.classList.contains('hidden')) closeMiniChat(); else openMiniChat();
+    }
+  });
+  document.getElementById('miniChatClose')?.addEventListener('click', ()=> closeMiniChat());
+  document.getElementById('miniChatSendBtn')?.addEventListener('click', ()=> miniSendChat());
+  document.getElementById('miniChatDivision')?.addEventListener('change', ()=> renderMiniChat());
+  // full-open button removed; mini chat only
+
+  // Initialize badge on load
+  setTimeout(()=> updateMiniBadge(), 300);
+
+  // Admin UI functions (demo): list chats, open, reply, assign, status
+  let adminSelectedDiv = null;
+  function renderAdminList(){
+    const raw = read(KEY_CHAT) || {};
+    const data = normalizeChat(raw);
+    write(KEY_CHAT, data);
+    const ul = document.getElementById('adminChatsList'); if(!ul) return; ul.innerHTML = '';
+    Object.keys(data).forEach(d => {
+      const chat = data[d];
+      const last = chat.messages.length ? chat.messages[chat.messages.length-1].text : '-';
+      const unread = chat.meta && chat.meta.unread ? chat.meta.unread : 0;
+      const li = document.createElement('li'); li.className = 'list-group-item';
+      li.innerHTML = `<div>${escapeHtml(d)}<div class=\"small muted\">${escapeHtml(String(last).slice(0,40))}</div></div><div>${unread?('<span class=\"badge bg-danger\">'+unread+'</span>'):''}</div>`;
+      li.addEventListener('click', ()=> openAdminSession(d));
+      ul.appendChild(li);
+    });
+  }
+
+  function openAdminSession(div){
+    adminSelectedDiv = div; const raw = read(KEY_CHAT) || {}; const data = normalizeChat(raw); const chat = data[div] || { messages:[], meta:{ status:'open', assigned:'', rating:null, unread:0, autoReplyEnabled:false, autoReplyTemplate:'' } };
+    // join socket room for admin view
+    if(socket && socketAvailable){ try{ socket.emit('join', { division: div }); } catch(e){ console.warn('socket join failed', e.message); } }
+    document.getElementById('adminChatTitleSelected').textContent = div;
+    document.getElementById('adminChatMeta').innerHTML = `Status: <span class=\"badge bg-secondary\">${chat.meta.status}</span> &nbsp; Assigned: <strong>${escapeHtml(chat.meta.assigned || '-')}</strong>`;
+    document.getElementById('adminStatusSel').value = chat.meta.status || 'open';
+    // populate auto-reply controls
+    const autoEnableEl = document.getElementById('adminAutoReplyEnable');
+    const autoInpEl = document.getElementById('adminAutoReplyInput');
+    if(autoEnableEl) autoEnableEl.checked = !!chat.meta.autoReplyEnabled;
+    if(autoInpEl) autoInpEl.value = chat.meta.autoReplyTemplate || '';
+    document.getElementById('adminMessages').innerHTML = chat.messages.map(m=>{
+      let att = '';
+      if(m.attachments && m.attachments.length) att = m.attachments.map(a=>`<div><a class=\"attachment-link\" href=\"${a.data}\" download=\"${escapeHtml(a.name)}\">📎 ${escapeHtml(a.name)}</a></div>`).join('');
+      const who = m.from === 'user' ? '<strong>User</strong>' : (m.from === 'admin' ? '<strong>Admin</strong>' : '<strong>System</strong>');
+      const typeLabel = m.type && m.type === 'keluhan' ? '<span class=\"badge bg-warning text-dark me-1 small\">Keluhan</span>' : '';
+      return `<div class=\"msg\"><div class=\"bubble\">${who}: ${typeLabel} ${escapeHtml(m.text||'')} ${att}</div></div>`;
+    }).join('');
+    // mark unread -> 0 and mark messages read
+    chat.meta.unread = 0; chat.messages.forEach(m=>{ if(m.status && m.status !== 'read') m.status = 'read'; }); data[div] = chat; write(KEY_CHAT, data); renderAdminList();
+  }
+
+  document.getElementById('adminSendBtn')?.addEventListener('click', ()=>{
+    const txt = document.getElementById('adminReplyInput')?.value || ''; const fileInput = document.getElementById('adminFile'); if(!adminSelectedDiv) return alert('Pilih chat dulu');
+    if(!txt && (!fileInput || !fileInput.files.length)) return;
+    const raw = read(KEY_CHAT) || {}; const data = normalizeChat(raw);
+    const msg = { from:'admin', text: txt, ts: Date.now(), status:'sent', attachments:[] };
+    const pushAdmin = ()=>{ data[adminSelectedDiv].messages.push(msg); data[adminSelectedDiv].meta.unread = (data[adminSelectedDiv].meta.unread||0) + 1; write(KEY_CHAT, data); document.getElementById('adminReplyInput').value = ''; if(fileInput) fileInput.value = null; openAdminSession(adminSelectedDiv); showToast('Sukses','Balasan terkirim','success');
+      if(socket && socketAvailable){ try{ socket.emit('send_message', { division: adminSelectedDiv, sender: 'admin', text: msg.text, attachments: msg.attachments }); }catch(e){ console.warn('socket emit failed', e.message); } }
+    };
+    if(fileInput && fileInput.files && fileInput.files[0]){ const f = fileInput.files[0]; const reader = new FileReader(); reader.onload = function(ev){ msg.attachments.push({ name: f.name, type: f.type, size: f.size, data: ev.target.result }); pushAdmin(); }; reader.readAsDataURL(f); } else pushAdmin();
+  });
+
+  document.getElementById('adminAssignBtn')?.addEventListener('click', ()=>{ if(!adminSelectedDiv) return; const raw = read(KEY_CHAT)||{}; const data = normalizeChat(raw); data[adminSelectedDiv].meta.assigned = 'Admin Demo'; write(KEY_CHAT, data); openAdminSession(adminSelectedDiv); showToast('Assigned','Chat diassign pada Anda','success'); });
+  document.getElementById('adminStatusSel')?.addEventListener('change', (e)=>{ if(!adminSelectedDiv) return; const raw = read(KEY_CHAT)||{}; const data = normalizeChat(raw); data[adminSelectedDiv].meta.status = e.target.value; write(KEY_CHAT, data); openAdminSession(adminSelectedDiv); showToast('Status','Status chat diubah','success'); });
+  document.getElementById('adminUseQuick')?.addEventListener('click', ()=>{ const v = document.getElementById('adminQuickReply')?.value || ''; if(v) document.getElementById('adminReplyInput').value = v; });
+  document.getElementById('adminSendQuick')?.addEventListener('click', ()=>{ const v = document.getElementById('adminQuickReply')?.value || ''; if(!v) return; document.getElementById('adminReplyInput').value = v; document.getElementById('adminSendBtn')?.click(); });
+  // Auto-reply controls: save changes immediately to meta
+  document.getElementById('adminAutoReplyEnable')?.addEventListener('change', (e)=>{
+    if(!adminSelectedDiv) return; const raw = read(KEY_CHAT)||{}; const data = normalizeChat(raw); data[adminSelectedDiv].meta.autoReplyEnabled = !!e.target.checked; write(KEY_CHAT, data); openAdminSession(adminSelectedDiv); showToast('Auto-reply','Pengaturan auto-reply disimpan','success');
+  });
+  // admin auto-reply input handler (saved on change)
+  document.getElementById('adminAutoReplyInput')?.addEventListener('change', (e)=>{
+    if(!adminSelectedDiv) return; const raw = read(KEY_CHAT)||{}; const data = normalizeChat(raw); data[adminSelectedDiv].meta.autoReplyTemplate = e.target.value || ''; write(KEY_CHAT, data); openAdminSession(adminSelectedDiv); showToast('Auto-reply','Template auto-reply disimpan','success');
+  });
+
+  // Admin quick replies and broadcast
+  const KEY_CHAT_QUICK = 'smarthcis_chat_quick';
+
+  function ensureAdminStorage(){
+    // default quick replies per division
+    const defaultQuick = {
+      Finance: [
+        'Terima kasih, kami akan memproses dokumen Anda dalam 2 hari kerja.',
+        'Sudah diterima, mohon tunggu konfirmasi lebih lanjut dari tim Finance.',
+        'Mohon lampirkan invoice dan bukti pembayaran terkait.',
+        'Jumlah belum sesuai; mohon periksa kembali detail transaksi.'
+      ],
+      HCIS: [
+        'Terima kasih, HR akan menindaklanjuti permintaan Anda.',
+        'Mohon lengkapi NIK dan dokumen pendukung.',
+        'Permintaan cuti Anda telah diterima dan sedang diproses.',
+        'Silakan hubungi HR untuk penjadwalan interview/meeting.'
+      ],
+      LDD: [
+        'Tim teknis mencatat kebutuhan Anda dan akan merespon dalam 1x24 jam.',
+        'Mohon jelaskan spesifikasi lebih detail atau lampirkan screenshot/error log.',
+        'Permintaan diterima, sedang dalam antrean pengerjaan.',
+        'Untuk permintaan integrasi, sertakan flow diagram atau use-case singkat.'
+      ]
+    };
+
+    const curQuick = read(KEY_CHAT_QUICK);
+    if(!curQuick){ write(KEY_CHAT_QUICK, defaultQuick); }
+    else { ['Finance','HCIS','LDD'].forEach(d=>{ if(!Array.isArray(curQuick[d]) || curQuick[d].length === 0) curQuick[d] = defaultQuick[d]; }); write(KEY_CHAT_QUICK, curQuick); }
+  }
+
+  // templates removed — admin uses quick replies or direct auto-reply input
+
+  function loadAdminQuickReplies(div){ ensureAdminStorage(); const q = read(KEY_CHAT_QUICK)||{}; const sel = document.getElementById('adminQuickReply'); if(!sel) return; sel.innerHTML = '<option value="">Quick reply...</option>'; (q[div]||[]).forEach(t=> sel.appendChild(new Option(t,t))); }
+
+  // add quick reply
+  document.getElementById('adminAddQuick')?.addEventListener('click', ()=>{
+    if(!adminSelectedDiv) return alert('Pilih chat/divisi dulu'); const v = document.getElementById('adminQuickAddInput')?.value || ''; if(!v) return; const q = read(KEY_CHAT_QUICK)||{}; q[adminSelectedDiv] = q[adminSelectedDiv]||[]; q[adminSelectedDiv].push(v); write(KEY_CHAT_QUICK, q); loadAdminQuickReplies(adminSelectedDiv); document.getElementById('adminQuickAddInput').value=''; showToast('Quick reply','Ditambahkan','success');
+  });
+
+  // template management removed — admin sets auto-reply via direct input or uses quick replies
+
+  // Broadcast to all divisions
+  document.getElementById('adminBroadcastBtn')?.addEventListener('click', ()=>{
+    const v = document.getElementById('adminBroadcastInput')?.value || ''; if(!v) return alert('Isi pesan broadcast'); const raw = read(KEY_CHAT)||{}; const data = normalizeChat(raw); ['Finance','HCIS','LDD'].forEach(d=>{ data[d].messages.push({ from:'admin', text: v, ts: Date.now(), status:'sent', attachments:[], type:'general' }); data[d].meta.unread = (data[d].meta.unread||0) + 1; }); write(KEY_CHAT, data); showToast('Broadcast','Terkirim ke semua divisi','success'); loadAdminQuickReplies(adminSelectedDiv||'Finance'); document.getElementById('adminBroadcastInput').value=''; renderAdminList(); if(socket && socketAvailable){ try{ socket.emit('broadcast', { text: v, sender:'admin' }); }catch(e){} }
+  });
+
+  // load quick replies whenever admin opens a session
+  const originalOpenAdminSession = openAdminSession;
+  window.openAdminSession = function(div){ originalOpenAdminSession(div); loadAdminQuickReplies(div); };
+
+  // open options modal
+  document.getElementById('adminOptionsBtn')?.addEventListener('click', ()=>{
+    const modalEl = document.getElementById('adminOptionsModal'); if(!modalEl) return;
+    const bsModal = new bootstrap.Modal(modalEl);
+    // ensure current division's quick replies are loaded
+    loadAdminQuickReplies(adminSelectedDiv || 'Finance');
+    // sync auto-reply checkbox/input
+    const raw = read(KEY_CHAT) || {}; const data = normalizeChat(raw); const meta = (adminSelectedDiv && data[adminSelectedDiv]) ? data[adminSelectedDiv].meta : null;
+    if(meta){ document.getElementById('adminAutoReplyEnable').checked = !!meta.autoReplyEnabled; const inp = document.getElementById('adminAutoReplyInput'); if(inp) inp.value = meta.autoReplyTemplate || ''; }
+    bsModal.show();
+  });
+
+  // initialize admin storages on load
+  ensureAdminStorage();
+
+  // document title flash for notifications
+  let titleFlashTimer = null; let originalTitle = document.title;
+  function flashTitle(msg){ if(titleFlashTimer) return; let showAlt = true; titleFlashTimer = setInterval(()=>{ document.title = showAlt ? msg : originalTitle; showAlt = !showAlt; }, 800); setTimeout(()=>{ clearInterval(titleFlashTimer); titleFlashTimer = null; document.title = originalTitle; }, 6000); }
+
+  /* ===========================
      Initialize when logged in
      =========================== */
   if(localStorage.getItem(LOGIN_KEY) === '1'){
@@ -1409,5 +1920,58 @@
     document.getElementById('pr_price')?.addEventListener('input', updatePRTotalDisplay);
   });
   </script>
+  <!-- Admin Options Modal -->
+  <div class="modal fade" id="adminOptionsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Admin Chat Options</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <h6>Quick Replies</h6>
+            <div class="d-flex gap-2 mb-2">
+              <select id="adminQuickReply" class="form-select form-select-sm w-50">
+                <option value="">Quick reply...</option>
+              </select>
+              <button id="adminUseQuick" class="btn btn-outline-secondary btn-sm">Use</button>
+              <button id="adminSendQuick" class="btn btn-sm btn-outline-primary">Send Now</button>
+            </div>
+            <div class="d-flex gap-2">
+              <input id="adminQuickAddInput" class="form-control form-control-sm" placeholder="Tambah quick reply..." />
+              <button id="adminAddQuick" class="btn btn-sm btn-outline-primary">Add Quick</button>
+            </div>
+          </div>
+
+          <hr />
+
+          <div class="mb-3">
+            <h6>Auto-reply</h6>
+            <div class="d-flex gap-2 align-items-center">
+              <input type="checkbox" id="adminAutoReplyEnable" />
+              <label for="adminAutoReplyEnable" class="small muted mb-0">Enable auto-reply for current division</label>
+            </div>
+            <div class="mt-2">
+              <textarea id="adminAutoReplyInput" class="form-control form-control-sm" rows="3" placeholder="Tulis isi auto-reply di sini..."></textarea>
+            </div>
+          </div>
+
+          <hr />
+
+          <div class="mb-3">
+            <h6>Broadcast</h6>
+            <div class="d-flex gap-2">
+              <input id="adminBroadcastInput" class="form-control form-control-sm" placeholder="Broadcast message to all divisions..." />
+              <button id="adminBroadcastBtn" class="btn btn-sm btn-warning">Broadcast</button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

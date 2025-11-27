@@ -1,18 +1,29 @@
-# CodeIgniter 4 Application Starter
+# SmartHCIS — Human Capital Management System
+
+**Latest Feature**: 🚀 **Inter-Division Chat System** (Real-time WebSocket + REST API + localStorage Demo)
+
+## What is SmartHCIS?
+
+SmartHCIS is a comprehensive Human Capital Information System built on CodeIgniter 4, providing:
+- Employee management and self-service portals
+- Performance evaluations and KPI tracking
+- Training & development programs
+- Purchase requisition workflows
+- **NEW: Inter-divisional real-time chat system** for Finance, HCIS, and LDD divisions
+
+### Chat System Features
+- **User Side**: Send messages, upload files, view history, rate resolved chats
+- **Admin Side**: Manage all chats, assign to team, set status, reply instantly
+- **Real-Time**: WebSocket (Socket.IO) with automatic fallback to demo mode
+- **Persistent**: MySQL database integration (ready to wire frontend)
+- **Responsive**: Works on desktop and mobile
+
+**Get Started**: See [CHAT_SETUP.md](./CHAT_SETUP.md) for quick start, or [CHAT_STATUS.md](./CHAT_STATUS.md) for full status.
 
 ## What is CodeIgniter?
 
 CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
-
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
-
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
-
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+This project uses CodeIgniter 4 as the foundation. See the [official site](https://codeigniter.com).
 
 ## Installation & updates
 
